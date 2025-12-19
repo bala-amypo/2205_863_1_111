@@ -19,7 +19,16 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
-            .authorize
+            .authorizeHttpRequests(auth -> auth
+               .requestMatchers(
+                "/auth/**",
+                "/swagger-ui/**"
+                "/v3/api-docs/**"
+               ).permitAll()
+               .anyRequest().authenticated()
+            );
+
+            return http.build();
     }
 }
 
