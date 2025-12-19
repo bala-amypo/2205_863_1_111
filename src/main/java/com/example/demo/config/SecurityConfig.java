@@ -9,5 +9,17 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @configuration
 @EnableWebSecurity
 
-public class SecurityConfig
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+
+        http
+            .csrf(csrf -> csrf.disable())
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
+            .authorize
+    }
+}
 
