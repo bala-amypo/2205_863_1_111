@@ -6,7 +6,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.SecrityFilterChain;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
-@configuration
+@Configuration
 @EnableWebSecurity
 
 public class SecurityConfig {
@@ -22,7 +22,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                .requestMatchers(
                 "/auth/**",
-                "/swagger-ui/**"
+                "/swagger-ui/**",
                 "/v3/api-docs/**"
                ).permitAll()
                .anyRequest().authenticated()
