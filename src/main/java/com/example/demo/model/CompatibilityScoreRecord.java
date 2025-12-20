@@ -4,60 +4,77 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "compatibility_score")
 public class CompatibilityScoreRecord {
 
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
 private Long id;
 
-private Long student1Id;
-private Long student2Id;
+private Long studentAId;
+private Long studentBId;
 
-private Integer score;
-private LocalDateTime calculatedAt;
+private Double score;
+
+private String compatibilityLevel;
+
+private LocalDateTime computedAt;
+
+@Column(columnDefinition = "TEXT")
+private String detailsJson;
 
 public CompatibilityScoreRecord() {
-this.calculatedAt = LocalDateTime.now();
 }
+
 
 public Long getId() {
 return id;
 }
 
-public void setId(Long id) {
-this.id = id;
+public Long getStudentAId() {
+return studentAId;
 }
 
-public Long getStudent1Id() {
-return student1Id;
+public void setStudentAId(Long studentAId) {
+this.studentAId = studentAId;
 }
 
-public void setStudent1Id(Long student1Id) {
-this.student1Id = student1Id;
+public Long getStudentBId() {
+return studentBId;
 }
 
-public Long getStudent2Id() {
-return student2Id;
+public void setStudentBId(Long studentBId) {
+this.studentBId = studentBId;
 }
 
-public void setStudent2Id(Long student2Id) {
-this.student2Id = student2Id;
-}
-
-public Integer getScore() {
+public Double getScore() {
 return score;
 }
 
-public void setScore(Integer score) {
+public void setScore(Double score) {
 this.score = score;
 }
 
-public LocalDateTime getCalculatedAt() {
-return calculatedAt;
+public String getCompatibilityLevel() {
+return compatibilityLevel;
 }
 
-public void setCalculatedAt(LocalDateTime calculatedAt) {
-this.calculatedAt = calculatedAt;
+public void setCompatibilityLevel(String compatibilityLevel) {
+this.compatibilityLevel = compatibilityLevel;
+}
+
+public LocalDateTime getComputedAt() {
+return computedAt;
+}
+
+public void setComputedAt(LocalDateTime computedAt) {
+this.computedAt = computedAt;
+}
+
+public String getDetailsJson() {
+return detailsJson;
+}
+
+public void setDetailsJson(String detailsJson) {
+this.detailsJson = detailsJson;
 }
 }

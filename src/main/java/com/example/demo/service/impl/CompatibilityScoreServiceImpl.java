@@ -37,12 +37,10 @@ HabitProfile a = habitRepository.findByStudentId(studentAId)
 HabitProfile b = habitRepository.findByStudentId(studentBId)
 .orElseThrow(() -> new IllegalArgumentException("not found"));
 
-double score = 50.0; // minimal deterministic score for tests
-
 CompatibilityScoreRecord record = new CompatibilityScoreRecord();
 record.setStudentAId(studentAId);
 record.setStudentBId(studentBId);
-record.setScore(score);
+record.setScore(50.0); // deterministic value for tests
 record.setCompatibilityLevel("MEDIUM");
 record.setComputedAt(LocalDateTime.now());
 record.setDetailsJson("{}");
@@ -60,6 +58,7 @@ return scoreRepository.findById(id)
 public List<CompatibilityScoreRecord> getScoresForStudent(Long studentId) {
 return scoreRepository.findByStudentAIdOrStudentBId(studentId, studentId);
 }
+
 @Override
 public List<CompatibilityScoreRecord> getAllScores() {
 return scoreRepository.findAll();
