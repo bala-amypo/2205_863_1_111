@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface HabitProfileService {
 
-    HabitProfile createOrUpdateHabit(HabitProfile habit);
+HabitProfile createOrUpdateHabit(HabitProfile habit);
 
-        HabitProfile getHabitByStudent(Long studentId);
+HabitProfile getHabitByStudent(Long studentId);
 
-            HabitProfile getHabitById(Long id);
+HabitProfile getHabitById(Long id);
 
-                List<HabitProfile> getAllHabitProfiles();
-                }
+List<HabitProfile> getAllHabitProfiles();
+}
