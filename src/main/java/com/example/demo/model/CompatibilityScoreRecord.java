@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "compatibility_score")
-public class CompatibilityScore {
+public class CompatibilityScoreRecord {
 
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,11 +14,10 @@ private Long id;
 private Long student1Id;
 private Long student2Id;
 
-private Integer score;   // 0 – 100
-
+private Integer score;
 private LocalDateTime calculatedAt;
 
-public CompatibilityScore() {
+public CompatibilityScoreRecord() {
 this.calculatedAt = LocalDateTime.now();
 }
 

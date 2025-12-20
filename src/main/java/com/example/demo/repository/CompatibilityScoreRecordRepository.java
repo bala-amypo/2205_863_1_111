@@ -1,11 +1,12 @@
+package com.example.demo.repository;
 
-import com.example.demo.model.CompatibilityScore;
+import com.example.demo.model.CompatibilityScoreRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface CompatibilityScoreRepository
-extends JpaRepository<CompatibilityScore, Long> {
+public interface CompatibilityScoreRecordRepository
+extends JpaRepository<CompatibilityScoreRecord, Long> {
 
-List<CompatibilityScore> findByStudent1Id(Long student1Id);
+List<CompatibilityScoreRecord> findByStudent1Id(Long student1Id);
 }
