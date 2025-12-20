@@ -4,24 +4,33 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class RoomAssignmentRecord {
+public class RoomAssignment {
 
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
 private Long id;
 
+private Long studentId;
+
 private String roomNumber;
-private Long studentAId;
-private Long studentBId;
+
 private String status;
-private LocalDateTime assignedAt = LocalDateTime.now();
+
+private LocalDateTime assignedAt;
+
+public RoomAssignment() {
+}
 
 public Long getId() {
 return id;
 }
 
-public void setId(Long id) {
-this.id = id;
+public Long getStudentId() {
+return studentId;
+}
+
+public void setStudentId(Long studentId) {
+this.studentId = studentId;
 }
 
 public String getRoomNumber() {
@@ -30,22 +39,6 @@ return roomNumber;
 
 public void setRoomNumber(String roomNumber) {
 this.roomNumber = roomNumber;
-}
-
-public Long getStudentAId() {
-return studentAId;
-}
-
-public void setStudentAId(Long studentAId) {
-this.studentAId = studentAId;
-}
-
-public Long getStudentBId() {
-return studentBId;
-}
-
-public void setStudentBId(Long studentBId) {
-this.studentBId = studentBId;
 }
 
 public String getStatus() {
@@ -58,5 +51,9 @@ this.status = status;
 
 public LocalDateTime getAssignedAt() {
 return assignedAt;
+}
+
+public void setAssignedAt(LocalDateTime assignedAt) {
+this.assignedAt = assignedAt;
 }
 }
