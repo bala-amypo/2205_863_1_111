@@ -17,15 +17,14 @@ this.service = service;
 }
 
 @PostMapping
-public MatchAttemptRecord logAttempt(@RequestBody MatchAttemptRecord record) {
+public MatchAttemptRecord logMatchAttempt(@RequestBody MatchAttemptRecord record) {
 return service.logAttempt(record);
 }
 
 @PutMapping("/{id}/status")
 public MatchAttemptRecord updateStatus(
 @PathVariable Long id,
-@RequestParam String status
-) {
+@RequestParam String status) {
 return service.updateStatus(id, status);
 }
 
