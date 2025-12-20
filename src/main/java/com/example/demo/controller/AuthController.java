@@ -33,9 +33,4 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
-
-    @GetMapping("/health")
-    public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("Auth service is running");
-    }
 }
