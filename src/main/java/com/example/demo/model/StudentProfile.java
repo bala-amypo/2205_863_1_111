@@ -4,12 +4,6 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-uniqueConstraints = {
-@UniqueConstraint(columnNames = "studentId"),
-@UniqueConstraint(columnNames = "email")
-}
-)
 public class StudentProfile {
 
 @Id
@@ -22,7 +16,12 @@ private String email;
 private String department;
 private Integer yearLevel;
 private Boolean active;
-private LocalDateTime createdAt = LocalDateTime.now();
+private LocalDateTime createdAt;
+
+public StudentProfile() {
+this.createdAt = LocalDateTime.now();
+this.active = true;
+}
 
 public Long getId() {
 return id;
@@ -82,5 +81,9 @@ this.active = active;
 
 public LocalDateTime getCreatedAt() {
 return createdAt;
+}
+
+public void setCreatedAt(LocalDateTime createdAt) {
+this.createdAt = createdAt;
 }
 }
