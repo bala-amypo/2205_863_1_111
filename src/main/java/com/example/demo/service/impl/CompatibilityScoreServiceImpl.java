@@ -43,4 +43,10 @@ return repository.findById(id)
 public List<CompatibilityScoreRecord> getScoresForStudent(Long studentId) {
 return repository.findByStudent1Id(studentId);
 }
+
+
+@Override
+public List<CompatibilityScoreRecord> getAllScores() {
+return compatibilityScoreRecordRepository.findAll();
+}
 }
