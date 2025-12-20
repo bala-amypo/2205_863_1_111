@@ -17,7 +17,7 @@ this.service = service;
 }
 
 @PostMapping
-public StudentProfile create(@RequestBody StudentProfile student) {}
+public StudentProfile create(@RequestBody StudentProfile student) {
 return service.create(student);
 }
 
