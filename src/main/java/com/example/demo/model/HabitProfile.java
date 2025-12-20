@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class HabitProfile {}
+@Table(name = "habit_profile")
+public class HabitProfile {
 
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,13 +13,16 @@ private Long id;
 
 private Long studentId;
 
-private String sleepSchedule;     
+private String sleepSchedule;
 private Integer studyHoursPerDay;
-private String cleanlinessLevel;   
-private String noiseTolerance;      
-private String socialPreference;  
+private String cleanlinessLevel;
+private String noiseTolerance;
+private String socialPreference;
 
 private LocalDateTime updatedAt;
+
+public HabitProfile() {
+}
 
 public Long getId() {
 return id;
