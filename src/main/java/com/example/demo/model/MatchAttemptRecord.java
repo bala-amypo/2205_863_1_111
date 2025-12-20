@@ -10,33 +10,31 @@ public class MatchAttemptRecord {
 @GeneratedValue(strategy = GenerationType.IDENTITY)
 private Long id;
 
-private Long initiatorStudentId;
-private Long candidateStudentId;
+private Long studentAId;
+private Long studentBId;
 private String status;
-private LocalDateTime attemptedAt = LocalDateTime.now();
+private LocalDateTime attemptedAt;
+
+public MatchAttemptRecord() {}
 
 public Long getId() {
 return id;
 }
 
-public void setId(Long id) {
-this.id = id;
+public Long getStudentAId() {
+return studentAId;
 }
 
-public Long getInitiatorStudentId() {
-return initiatorStudentId;
+public void setStudentAId(Long studentAId) {
+this.studentAId = studentAId;
 }
 
-public void setInitiatorStudentId(Long initiatorStudentId) {
-this.initiatorStudentId = initiatorStudentId;
+public Long getStudentBId() {
+return studentBId;
 }
 
-public Long getCandidateStudentId() {
-return candidateStudentId;
-}
-
-public void setCandidateStudentId(Long candidateStudentId) {
-this.candidateStudentId = candidateStudentId;
+public void setStudentBId(Long studentBId) {
+this.studentBId = studentBId;
 }
 
 public String getStatus() {
@@ -49,5 +47,9 @@ this.status = status;
 
 public LocalDateTime getAttemptedAt() {
 return attemptedAt;
+}
+
+public void setAttemptedAt(LocalDateTime attemptedAt) {
+this.attemptedAt = attemptedAt;
 }
 }
