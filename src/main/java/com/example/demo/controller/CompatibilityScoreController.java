@@ -12,10 +12,10 @@ import java.util.List;
 @Tag(name = "Compatibility Score")
 public class CompatibilityScoreController {
 
-private final CompatibilityScoreService compatibilityScoreService;
+private final CompatibilityScoreService service;
 
-public CompatibilityScoreController(CompatibilityScoreService compatibilityScoreService) {
-this.compatibilityScoreService = compatibilityScoreService;
+public CompatibilityScoreController(CompatibilityScoreService service) {
+this.service = service;
 }
 
 @PostMapping("/calculate")
@@ -23,18 +23,22 @@ public CompatibilityScoreRecord calculate(
 @RequestParam Long student1Id,
 @RequestParam Long student2Id) {
 
-return compatibilityScoreService.calculateScore(student1Id, student2Id);
+return service.calculateScore(student1Id, student2Id);
 }
 
 @GetMapping("/{id}")
 public CompatibilityScoreRecord getById(@PathVariable Long id) {
-return compatibilityScoreService.getScoreById(id);
+return service.getScoreById(id);
 }
 
 @GetMapping("/student/{studentId}")
 public List<CompatibilityScoreRecord> getForStudent(
 @PathVariable Long studentId) {
 
-return compatibilityScoreService.getScoresForStudent(studentId);
+return service.getScoresForStudent(studentId);
+}
+@GetMapping
+public List<CompatibilityScoreRecord> getAll() {
+return service.getAllScores();
 }
 }
