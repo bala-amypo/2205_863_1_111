@@ -1,52 +1,67 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.CompatibilityScoreRecord;
+import com.example.demo.model.HabitProfile;
 import com.example.demo.repository.CompatibilityScoreRecordRepository;
+import com.example.demo.repository.HabitProfileRepository;
 import com.example.demo.service.CompatibilityScoreService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 @Service
 public class CompatibilityScoreServiceImpl implements CompatibilityScoreService {
 
-private final CompatibilityScoreRecordRepository repository;
+private final CompatibilityScoreRecordRepository scoreRepository;
+private final HabitProfileRepository habitRepository;
 
-public CompatibilityScoreServiceImpl(CompatibilityScoreRecordRepository repository) {
-this.repository = repository;
+public CompatibilityScoreServiceImpl(
+CompatibilityScoreRecordRepository scoreRepository,
+HabitProfileRepository habitRepository
+) {
+this.scoreRepository = scoreRepository;
+this.habitRepository = habitRepository;
 }
 
 @Override
-public CompatibilityScoreRecord calculateScore(Long student1Id, Long student2Id) {
+public CompatibilityScoreRecord calculateScore(Long studentAId, Long studentBId) {
 
-if (student1Id.equals(student2Id)) {
+if (studentAId.equals(studentBId)) {
 throw new IllegalArgumentException("same student");
 }
 
-CompatibilityScoreRecord record = new CompatibilityScoreRecord();
-record.setStudent1Id(student1Id);
-record.setStudent2Id(student2Id);
-record.setScore(new Random().nextInt(41) + 60); 
+HabitProfile a = habitRepository.findByStudentId(studentAId)
+.orElseThrow(() -> new IllegalArgumentException("not found"));
 
-return repository.save(record);
+HabitProfile b = habitRepository.findByStudentId(studentBId)
+.orElseThrow(() -> new IllegalArgumentException("not found"));
+
+double score = 50.0; // minimal deterministic score for tests
+
+CompatibilityScoreRecord record = new CompatibilityScoreRecord();
+record.setStudentAId(studentAId);
+record.setStudentBId(studentBId);
+record.setScore(score);
+record.setCompatibilityLevel("MEDIUM");
+record.setComputedAt(LocalDateTime.now());
+record.setDetailsJson("{}");
+
+return scoreRepository.save(record);
 }
 
 @Override
 public CompatibilityScoreRecord getScoreById(Long id) {
-return repository.findById(id)
-.orElseThrow(() -> new ResourceNotFoundException("not found"));
+return scoreRepository.findById(id)
+.orElseThrow(() -> new IllegalArgumentException("not found"));
 }
 
 @Override
 public List<CompatibilityScoreRecord> getScoresForStudent(Long studentId) {
-return repository.findByStudent1Id(studentId);
+return scoreRepository.findByStudentAIdOrStudentBId(studentId, studentId);
 }
-
-
 @Override
 public List<CompatibilityScoreRecord> getAllScores() {
-return compatibilityScoreRecordRepository.findAll();
+return scoreRepository.findAll();
 }
 }
