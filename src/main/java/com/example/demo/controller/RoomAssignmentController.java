@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.RoomAssignment;
+import com.example.demo.model.RoomAssignmentRecord;
 import com.example.demo.service.RoomAssignmentService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +17,12 @@ this.service = service;
 }
 
 @PostMapping
-public RoomAssignment assignRoom(@RequestBody RoomAssignment assignment) {
-return service.assignRoom(assignment);
+public RoomAssignmentRecord assignRoom(@RequestBody RoomAssignmentRecord record) {
+return service.assignRoom(record);
 }
 
 @PutMapping("/{id}/status")
-public RoomAssignment updateStatus(
+public RoomAssignmentRecord updateStatus(
 @PathVariable Long id,
 @RequestParam String status
 ) {
@@ -30,19 +30,19 @@ return service.updateStatus(id, status);
 }
 
 @GetMapping("/student/{studentId}")
-public List<RoomAssignment> getAssignmentsForStudent(
+public List<RoomAssignmentRecord> getAssignmentsForStudent(
 @PathVariable Long studentId
 ) {
 return service.getAssignmentsForStudent(studentId);
 }
 
 @GetMapping("/{id}")
-public RoomAssignment getById(@PathVariable Long id) {
+public RoomAssignmentRecord getById(@PathVariable Long id) {
 return service.getById(id);
 }
 
 @GetMapping
-public List<RoomAssignment> getAllAssignments() {
+public List<RoomAssignmentRecord> getAllAssignments() {
 return service.getAllAssignments();
 }
 }
