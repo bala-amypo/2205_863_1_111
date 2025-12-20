@@ -4,22 +4,18 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class RoomAssignment {
+public class RoomAssignmentRecord {
 
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
 private Long id;
 
 private Long studentId;
-
 private String roomNumber;
-
 private String status;
-
 private LocalDateTime assignedAt;
 
-public RoomAssignment() {
-}
+public RoomAssignmentRecord() {}
 
 public Long getId() {
 return id;
