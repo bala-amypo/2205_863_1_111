@@ -28,25 +28,28 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
     public CompatibilityScoreRecord calculateScore(Long studentAId, Long studentBId) {
 
         if (studentAId.equals(studentBId)) {
-            throw new IllegalArgumentException("Cannot calculate compatibility for same student");
+            throw new IllegalArgumentException("Same student not allowed");
         }
 
         HabitProfile a = habitRepository.findByStudentId(studentAId)
-                .orElseThrow(() -> new IllegalArgumentException("Student A habit profile not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Student A habit not found"));
 
         HabitProfile b = habitRepository.findByStudentId(studentBId)
-                .orElseThrow(() -> new IllegalArgumentException("Student B habit profile not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Student B habit not found"));
 
         int score = 0;
 
-        int sleepDiff = Math.abs(a.getSleepSchedule() - b.getSleepSchedule());
-        score += Math.max(0, 30 - (sleepDiff * 6));
+        if (a.getSleepSchedule().equalsIgnoreCase(b.getSleepSchedule())) {
+            score += 40;
+        }
 
-        int studyDiff = Math.abs(a.getStudyHours() - b.getStudyHours());
-        score += Math.max(0, 40 - (studyDiff * 5));
+        if (a.getCleanlinessLevel().equalsIgnoreCase(b.getCleanlinessLevel())) {
+            score += 30;
+        }
 
-        int cleanDiff = Math.abs(a.getCleanlinessLevel() - b.getCleanlinessLevel());
-        score += Math.max(0, 30 - (cleanDiff * 6));
+        if (a.getStudyPreference().equalsIgnoreCase(b.getStudyPreference())) {
+            score += 30;
+        }
 
         String level;
         if (score >= 70) {
@@ -60,15 +63,10 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
         CompatibilityScoreRecord record = new CompatibilityScoreRecord();
         record.setStudentAId(studentAId);
         record.setStudentBId(studentBId);
-        record.setScore(score);
+        record.setScore((double) score); // FIXED
         record.setCompatibilityLevel(level);
         record.setComputedAt(LocalDateTime.now());
-
-        record.setDetailsJson(
-                "{ \"sleepDiff\": " + sleepDiff +
-                ", \"studyDiff\": " + studyDiff +
-                ", \"cleanDiff\": " + cleanDiff + " }"
-        );
+        record.setDetailsJson("{\"scoreLogic\":\"string match\"}");
 
         return scoreRepository.save(record);
     }
