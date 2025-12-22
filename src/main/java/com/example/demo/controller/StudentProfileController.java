@@ -63,4 +63,12 @@ return ResponseEntity.ok(
 studentProfileService.findByStudentId(studentId)
 );
 }
+
+@PostMapping("/students")
+public ResponseEntity<StudentProfile> createStudent(
+        @Valid @RequestBody StudentProfile studentProfile) {
+
+    return ResponseEntity.ok(studentProfileService.save(studentProfile));
+}
+
 }
