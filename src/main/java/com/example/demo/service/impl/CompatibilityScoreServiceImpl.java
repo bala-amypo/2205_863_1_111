@@ -40,15 +40,11 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
         int score = 0;
 
         if (a.getSleepSchedule().equalsIgnoreCase(b.getSleepSchedule())) {
-            score += 40;
+            score += 50;
         }
 
         if (a.getCleanlinessLevel().equalsIgnoreCase(b.getCleanlinessLevel())) {
-            score += 30;
-        }
-
-        if (a.getStudyPreference().equalsIgnoreCase(b.getStudyPreference())) {
-            score += 30;
+            score += 50;
         }
 
         String level;
@@ -63,10 +59,10 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
         CompatibilityScoreRecord record = new CompatibilityScoreRecord();
         record.setStudentAId(studentAId);
         record.setStudentBId(studentBId);
-        record.setScore((double) score); // FIXED
+        record.setScore((double) score);
         record.setCompatibilityLevel(level);
         record.setComputedAt(LocalDateTime.now());
-        record.setDetailsJson("{\"scoreLogic\":\"string match\"}");
+        record.setDetailsJson("{}");
 
         return scoreRepository.save(record);
     }
