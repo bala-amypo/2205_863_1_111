@@ -13,7 +13,6 @@ public class HabitProfileServiceImpl implements HabitProfileService {
 
 private final HabitProfileRepository habitProfileRepository;
 
-// Constructor Injection (MANDATORY)
 public HabitProfileServiceImpl(HabitProfileRepository habitProfileRepository) {
 this.habitProfileRepository = habitProfileRepository;
 }
