@@ -13,54 +13,79 @@ import java.util.List;
 @Service
 public class CompatibilityScoreServiceImpl implements CompatibilityScoreService {
 
-private final CompatibilityScoreRecordRepository scoreRepository;
-private final HabitProfileRepository habitRepository;
+    private final CompatibilityScoreRecordRepository scoreRepository;
+    private final HabitProfileRepository habitRepository;
 
-public CompatibilityScoreServiceImpl(
-CompatibilityScoreRecordRepository scoreRepository,
-HabitProfileRepository habitRepository
-) {
-this.scoreRepository = scoreRepository;
-this.habitRepository = habitRepository;
-}
+    public CompatibilityScoreServiceImpl(
+            CompatibilityScoreRecordRepository scoreRepository,
+            HabitProfileRepository habitRepository
+    ) {
+        this.scoreRepository = scoreRepository;
+        this.habitRepository = habitRepository;
+    }
 
-@Override
-public CompatibilityScoreRecord calculateScore(Long studentAId, Long studentBId) {
+    @Override
+    public CompatibilityScoreRecord calculateScore(Long studentAId, Long studentBId) {
 
-if (studentAId.equals(studentBId)) {
-throw new IllegalArgumentException("same student");
-}
+        if (studentAId.equals(studentBId)) {
+            throw new IllegalArgumentException("Cannot calculate compatibility for same student");
+        }
 
-HabitProfile a = habitRepository.findByStudentId(studentAId)
-.orElseThrow(() -> new IllegalArgumentException("not found"));
+        HabitProfile a = habitRepository.findByStudentId(studentAId)
+                .orElseThrow(() -> new IllegalArgumentException("Student A habit profile not found"));
 
-HabitProfile b = habitRepository.findByStudentId(studentBId)
-.orElseThrow(() -> new IllegalArgumentException("not found"));
+        HabitProfile b = habitRepository.findByStudentId(studentBId)
+                .orElseThrow(() -> new IllegalArgumentException("Student B habit profile not found"));
 
-CompatibilityScoreRecord record = new CompatibilityScoreRecord();
-record.setStudentAId(studentAId);
-record.setStudentBId(studentBId);
-record.setScore(50.0); 
-record.setCompatibilityLevel("MEDIUM");
-record.setComputedAt(LocalDateTime.now());
-record.setDetailsJson("{}");
+        int score = 0;
 
-return scoreRepository.save(record);
-}
+        int sleepDiff = Math.abs(a.getSleepSchedule() - b.getSleepSchedule());
+        score += Math.max(0, 30 - (sleepDiff * 6));
 
-@Override
-public CompatibilityScoreRecord getScoreById(Long id) {
-return scoreRepository.findById(id)
-.orElseThrow(() -> new IllegalArgumentException("not found"));
-}
+        int studyDiff = Math.abs(a.getStudyHours() - b.getStudyHours());
+        score += Math.max(0, 40 - (studyDiff * 5));
 
-@Override
-public List<CompatibilityScoreRecord> getScoresForStudent(Long studentId) {
-return scoreRepository.findByStudentAIdOrStudentBId(studentId, studentId);
-}
+        int cleanDiff = Math.abs(a.getCleanlinessLevel() - b.getCleanlinessLevel());
+        score += Math.max(0, 30 - (cleanDiff * 6));
 
-@Override
-public List<CompatibilityScoreRecord> getAllScores() {
-return scoreRepository.findAll();
-}
+        String level;
+        if (score >= 70) {
+            level = "HIGH";
+        } else if (score >= 40) {
+            level = "MEDIUM";
+        } else {
+            level = "LOW";
+        }
+
+        CompatibilityScoreRecord record = new CompatibilityScoreRecord();
+        record.setStudentAId(studentAId);
+        record.setStudentBId(studentBId);
+        record.setScore(score);
+        record.setCompatibilityLevel(level);
+        record.setComputedAt(LocalDateTime.now());
+
+        record.setDetailsJson(
+                "{ \"sleepDiff\": " + sleepDiff +
+                ", \"studyDiff\": " + studyDiff +
+                ", \"cleanDiff\": " + cleanDiff + " }"
+        );
+
+        return scoreRepository.save(record);
+    }
+
+    @Override
+    public CompatibilityScoreRecord getScoreById(Long id) {
+        return scoreRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Score not found"));
+    }
+
+    @Override
+    public List<CompatibilityScoreRecord> getScoresForStudent(Long studentId) {
+        return scoreRepository.findByStudentAIdOrStudentBId(studentId, studentId);
+    }
+
+    @Override
+    public List<CompatibilityScoreRecord> getAllScores() {
+        return scoreRepository.findAll();
+    }
 }
