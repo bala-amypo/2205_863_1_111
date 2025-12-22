@@ -40,7 +40,7 @@ HabitProfile b = habitRepository.findByStudentId(studentBId)
 CompatibilityScoreRecord record = new CompatibilityScoreRecord();
 record.setStudentAId(studentAId);
 record.setStudentBId(studentBId);
-record.setScore(50.0); // deterministic value for tests
+record.setScore(50.0); 
 record.setCompatibilityLevel("MEDIUM");
 record.setComputedAt(LocalDateTime.now());
 record.setDetailsJson("{}");
