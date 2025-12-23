@@ -1,40 +1,26 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.CompatibilityScoreRecord;
 import com.example.demo.service.CompatibilityScoreService;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/compatibility")
-public class CompatibilityScoreController {
+@RequestMapping("/compatibility")
+public class CompatibilityScoreController {}
 
 private final CompatibilityScoreService service;
 
-public CompatibilityScoreController(CompatibilityScoreService service) {}
+public CompatibilityScoreController(CompatibilityScoreService service) {
 this.service = service;
 }
 
-@PostMapping("/calculate")
-public CompatibilityScoreRecord calculate(
-@RequestParam Long studentAId,
-@RequestParam Long studentBId) {
-return service.computeScore(studentAId, studentBId);
-}
+@GetMapping("/{studentA}/{studentB}")
+public int calculateCompatibility(
+@PathVariable Long studentA,
+@PathVariable Long studentB) {
 
-@GetMapping("/{id}")
-public CompatibilityScoreRecord getById(@PathVariable Long id) {
-return service.getScoreById(id);
-}
-
-@GetMapping("/student/{studentId}")
-public List<CompatibilityScoreRecord> getForStudent(@PathVariable Long studentId) {
-return service.getScoresForStudent(studentId);
-}
-
-@GetMapping
-public List<CompatibilityScoreRecord> getAll() {
-return service.getAllScores();
+return service.calculateScore(studentA, studentB);
 }
 }
