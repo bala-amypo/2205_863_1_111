@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class CompatibilityScoreServiceImpl implements CompatibilityScoreService {}
+public class CompatibilityScoreServiceImpl implements CompatibilityScoreService {
 
 private final CompatibilityScoreRecordRepository scoreRepository;
 private final HabitProfileRepository habitRepository;
