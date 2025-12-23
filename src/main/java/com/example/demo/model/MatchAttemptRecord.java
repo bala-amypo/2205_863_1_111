@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "match_attempt_record")
 public class MatchAttemptRecord {
 
 @Id
@@ -11,14 +12,23 @@ public class MatchAttemptRecord {
 private Long id;
 
 private Long studentAId;
+
 private Long studentBId;
-private String status;
+
+private String result;
+
 private LocalDateTime attemptedAt;
 
-public MatchAttemptRecord() {}
+public MatchAttemptRecord() {
+this.attemptedAt = LocalDateTime.now();
+}
 
 public Long getId() {
 return id;
+}
+
+public void setId(Long id) {
+this.id = id;
 }
 
 public Long getStudentAId() {
@@ -37,12 +47,12 @@ public void setStudentBId(Long studentBId) {
 this.studentBId = studentBId;
 }
 
-public String getStatus() {
-return status;
+public String getResult() {
+return result;
 }
 
-public void setStatus(String status) {
-this.status = status;
+public void setResult(String result) {
+this.result = result;
 }
 
 public LocalDateTime getAttemptedAt() {

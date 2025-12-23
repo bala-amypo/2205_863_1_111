@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "compatibility_score_record")
 public class CompatibilityScoreRecord {
 
 @Id
@@ -11,6 +12,7 @@ public class CompatibilityScoreRecord {
 private Long id;
 
 private Long studentAId;
+
 private Long studentBId;
 
 private Double score;
@@ -19,15 +21,18 @@ private String compatibilityLevel;
 
 private LocalDateTime computedAt;
 
-@Column(columnDefinition = "TEXT")
+@Lob
 private String detailsJson;
 
 public CompatibilityScoreRecord() {
 }
 
-
 public Long getId() {
 return id;
+}
+
+public void setId(Long id) {
+this.id = id;
 }
 
 public Long getStudentAId() {
