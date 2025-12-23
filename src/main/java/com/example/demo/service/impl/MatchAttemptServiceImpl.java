@@ -2,6 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.model.MatchAttemptRecord;
 import com.example.demo.repository.MatchAttemptRecordRepository;
+import com.example.demo.repository.CompatibilityScoreRecordRepository;
 import com.example.demo.service.MatchAttemptService;
 import org.springframework.stereotype.Service;
 
@@ -11,39 +12,42 @@ import java.util.List;
 @Service
 public class MatchAttemptServiceImpl implements MatchAttemptService {
 
-private final MatchAttemptRecordRepository repository;
+private final MatchAttemptRecordRepository repo;
+private final CompatibilityScoreRecordRepository scoreRepo;
 
-public MatchAttemptServiceImpl(MatchAttemptRecordRepository repository) {
-this.repository = repository;
+public MatchAttemptServiceImpl(
+MatchAttemptRecordRepository repo,
+CompatibilityScoreRecordRepository scoreRepo) {
+this.repo = repo;
+this.scoreRepo = scoreRepo;
 }
 
 @Override
-public MatchAttemptRecord logAttempt(MatchAttemptRecord record) {
-record.setAttemptedAt(LocalDateTime.now());
-return repository.save(record);
+public MatchAttemptRecord logMatchAttempt(MatchAttemptRecord attempt) {
+attempt.setAttemptedAt(LocalDateTime.now());
+return repo.save(attempt);
 }
 
 @Override
-public MatchAttemptRecord updateStatus(Long id, String status) {
-MatchAttemptRecord record = repository.findById(id)
-.orElseThrow(() -> new RuntimeException("Attempt not found"));
+public MatchAttemptRecord updateAttemptStatus(Long id, String status) {
+MatchAttemptRecord record = getAttemptById(id);
 record.setStatus(status);
-return repository.save(record);
+return repo.save(record);
 }
 
 @Override
-public MatchAttemptRecord getById(Long id) {
-return repository.findById(id)
-.orElseThrow(() -> new RuntimeException("Attempt not found"));
+public MatchAttemptRecord getAttemptById(Long id) {
+return repo.findById(id)
+.orElseThrow(() -> new IllegalArgumentException("not found"));
 }
 
 @Override
-public List<MatchAttemptRecord> getByStudent(Long studentId) {
-return repository.findByStudentAIdOrStudentBId(studentId, studentId);
+public List<MatchAttemptRecord> getAttemptsByStudent(Long studentId) {
+return repo.findByInitiatorStudentIdOrCandidateStudentId(studentId, studentId);
 }
 
 @Override
-public List<MatchAttemptRecord> getAll() {
-return repository.findAll();
+public List<MatchAttemptRecord> getAllMatchAttempts() {
+return repo.findAll();
 }
 }
