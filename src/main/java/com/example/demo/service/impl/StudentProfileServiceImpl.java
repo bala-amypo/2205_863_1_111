@@ -1,42 +1,45 @@
-// com/example/demo/service/impl/StudentProfileServiceImpl.java
 package com.example.demo.service.impl;
 
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.StudentProfile;
 import com.example.demo.repository.StudentProfileRepository;
 import com.example.demo.service.StudentProfileService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public class StudentProfileServiceImpl implements StudentProfileService {}
+@Service
+public class StudentProfileServiceImpl implements StudentProfileService {
 
-private final StudentProfileRepository studentProfileRepository;
+private final StudentProfileRepository repository;
 
-public StudentProfileServiceImpl(StudentProfileRepository studentProfileRepository) {
-this.studentProfileRepository = studentProfileRepository;
+public StudentProfileServiceImpl(StudentProfileRepository repository) {
+this.repository = repository;
 }
 
 @Override
 public StudentProfile createStudent(StudentProfile profile) {
-studentProfileRepository.findByStudentId(profile.getStudentId())
-.ifPresent(s -> { throw new IllegalArgumentException("studentId exists"); });
-return studentProfileRepository.save(profile);
+repository.findByStudentId(profile.getStudentId())
+.ifPresent(s -> {
+throw new IllegalArgumentException("studentId exists");
+});
+return repository.save(profile);
 }
 
 @Override
 public StudentProfile getStudentById(Long id) {
-return studentProfileRepository.findById(id)
+return repository.findById(id)
 .orElseThrow(() -> new ResourceNotFoundException("not found"));
 }
 
 @Override
 public List<StudentProfile> getAllStudents() {
-return studentProfileRepository.findAll();
+return repository.findAll();
 }
 
 @Override
 public StudentProfile findByStudentId(String studentId) {
-return studentProfileRepository.findByStudentId(studentId)
+return repository.findByStudentId(studentId)
 .orElseThrow(() -> new ResourceNotFoundException("not found"));
 }
 
@@ -44,6 +47,6 @@ return studentProfileRepository.findByStudentId(studentId)
 public StudentProfile updateStudentStatus(Long id, boolean active) {
 StudentProfile student = getStudentById(id);
 student.setActive(active);
-return studentProfileRepository.save(student);
+return repository.save(student);
 }
 }
