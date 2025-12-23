@@ -8,5 +8,8 @@ import java.util.List;
 public interface MatchAttemptRecordRepository
 extends JpaRepository<MatchAttemptRecord, Long> {
 
-List<MatchAttemptRecord> findByStudentAIdOrStudentBId(Long a, Long b);
+List<MatchAttemptRecord> findByStudentAIdOrStudentBId(
+Long studentAId,
+Long studentBId
+);
 }
