@@ -1,10 +1,14 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "habit_profile")
+@Table(
+name = "habit_profile",
+uniqueConstraints = {
+@UniqueConstraint(columnNames = "studentId")
+}
+)
 public class HabitProfile {
 
 @Id
@@ -14,12 +18,16 @@ private Long id;
 private Long studentId;
 
 private String sleepSchedule;
-private Integer studyHoursPerDay;
-private String cleanlinessLevel;
-private String noiseTolerance;
-private String socialPreference;
 
-private LocalDateTime updatedAt;
+private String cleanlinessLevel;
+
+private String noiseTolerance;
+
+private String studyPreference;
+
+private Boolean smoking;
+
+private Boolean drinking;
 
 public HabitProfile() {
 }
@@ -48,14 +56,6 @@ public void setSleepSchedule(String sleepSchedule) {
 this.sleepSchedule = sleepSchedule;
 }
 
-public Integer getStudyHoursPerDay() {
-return studyHoursPerDay;
-}
-
-public void setStudyHoursPerDay(Integer studyHoursPerDay) {
-this.studyHoursPerDay = studyHoursPerDay;
-}
-
 public String getCleanlinessLevel() {
 return cleanlinessLevel;
 }
@@ -72,19 +72,27 @@ public void setNoiseTolerance(String noiseTolerance) {
 this.noiseTolerance = noiseTolerance;
 }
 
-public String getSocialPreference() {
-return socialPreference;
+public String getStudyPreference() {
+return studyPreference;
 }
 
-public void setSocialPreference(String socialPreference) {
-this.socialPreference = socialPreference;
+public void setStudyPreference(String studyPreference) {
+this.studyPreference = studyPreference;
 }
 
-public LocalDateTime getUpdatedAt() {
-return updatedAt;
+public Boolean getSmoking() {
+return smoking;
 }
 
-public void setUpdatedAt(LocalDateTime updatedAt) {
-this.updatedAt = updatedAt;
+public void setSmoking(Boolean smoking) {
+this.smoking = smoking;
+}
+
+public Boolean getDrinking() {
+return drinking;
+}
+
+public void setDrinking(Boolean drinking) {
+this.drinking = drinking;
 }
 }
