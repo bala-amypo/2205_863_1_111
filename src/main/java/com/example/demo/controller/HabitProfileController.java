@@ -1,8 +1,11 @@
+// com/example/demo/controller/HabitProfileController.java
 package com.example.demo.controller;
 
 import com.example.demo.model.HabitProfile;
 import com.example.demo.service.HabitProfileService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/habits")
@@ -15,12 +18,22 @@ this.service = service;
 }
 
 @PostMapping
-public HabitProfile save(@RequestBody HabitProfile habit) {
-return service.save(habit);
+public HabitProfile createOrUpdate(@RequestBody HabitProfile habit) {
+return service.createOrUpdateHabit(habit);
 }
 
 @GetMapping("/student/{studentId}")
 public HabitProfile getByStudent(@PathVariable Long studentId) {
-return service.findByStudentId(studentId);
+return service.getHabitByStudent(studentId);
+}
+
+@GetMapping("/{id}")
+public HabitProfile getById(@PathVariable Long id) {
+return service.getHabitById(id);
+}
+
+@GetMapping
+public List<HabitProfile> getAll() {
+return service.getAllHabitProfiles();
 }
 }

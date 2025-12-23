@@ -1,16 +1,14 @@
+// com/example/demo/controller/RoomAssignmentController.java
 package com.example.demo.controller;
 
 import com.example.demo.model.RoomAssignmentRecord;
 import com.example.demo.service.RoomAssignmentService;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/room-assignments")
-@Tag(name = "Room Assignment")
 public class RoomAssignmentController {
 
 private final RoomAssignmentService service;
@@ -20,29 +18,28 @@ this.service = service;
 }
 
 @PostMapping
-public ResponseEntity<RoomAssignmentRecord> assign(@RequestBody RoomAssignmentRecord record) {
-return ResponseEntity.ok(service.assignRoom(record));
-}
-
-@GetMapping("/{id}")
-public ResponseEntity<RoomAssignmentRecord> getById(@PathVariable Long id) {
-return ResponseEntity.ok(service.getAssignmentById(id));
-}
-
-@GetMapping
-public ResponseEntity<List<RoomAssignmentRecord>> getAll() {
-return ResponseEntity.ok(service.getAllAssignments());
-}
-
-@GetMapping("/student/{studentId}")
-public ResponseEntity<List<RoomAssignmentRecord>> getByStudent(@PathVariable Long studentId) {
-return ResponseEntity.ok(service.getAssignmentsByStudent(studentId));
+public RoomAssignmentRecord assign(@RequestBody RoomAssignmentRecord record) {
+return service.assignRoom(record);
 }
 
 @PutMapping("/{id}/status")
-public ResponseEntity<RoomAssignmentRecord> updateStatus(
-@PathVariable Long id,
+public RoomAssignmentRecord updateStatus(@PathVariable Long id,
 @RequestParam String status) {
-return ResponseEntity.ok(service.updateStatus(id, status));
+return service.updateStatus(id, status);
+}
+
+@GetMapping("/{id}")
+public RoomAssignmentRecord getById(@PathVariable Long id) {
+return service.getAssignmentById(id);
+}
+
+@GetMapping("/student/{studentId}")
+public List<RoomAssignmentRecord> getByStudent(@PathVariable Long studentId) {
+return service.getAssignmentsByStudent(studentId);
+}
+
+@GetMapping
+public List<RoomAssignmentRecord> getAll() {
+return service.getAllAssignments();
 }
 }
