@@ -19,10 +19,12 @@ this.repository = repository;
 }
 
 @Override
-public HabitProfile createOrUpdateHabit(HabitProfile habit) {}
+public HabitProfile createOrUpdateHabit(HabitProfile habit) {
+
 if (habit.getStudyHoursPerDay() < 0) {
 throw new IllegalArgumentException("study hours");
 }
+
 habit.setUpdatedAt(LocalDateTime.now());
 return repository.save(habit);
 }

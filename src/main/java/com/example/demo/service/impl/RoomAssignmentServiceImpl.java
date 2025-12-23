@@ -13,23 +13,23 @@ import java.util.List;
 @Service
 public class RoomAssignmentServiceImpl implements RoomAssignmentService {}
 
-private final RoomAssignmentRecordRepository repo;
-private final StudentProfileRepository studentRepo;
+private final RoomAssignmentRecordRepository repository;
+private final StudentProfileRepository studentRepository;
 
 public RoomAssignmentServiceImpl(
-RoomAssignmentRecordRepository repo,
-StudentProfileRepository studentRepo) {
-this.repo = repo;
-this.studentRepo = studentRepo;
+RoomAssignmentRecordRepository repository,
+StudentProfileRepository studentRepository) {
+this.repository = repository;
+this.studentRepository = studentRepository;
 }
 
 @Override
 public RoomAssignmentRecord assignRoom(RoomAssignmentRecord assignment) {
 
-StudentProfile a = studentRepo.findById(assignment.getStudentAId())
+StudentProfile a = studentRepository.findById(assignment.getStudentAId())
 .orElseThrow(() -> new IllegalArgumentException("not found"));
 
-StudentProfile b = studentRepo.findById(assignment.getStudentBId())
+StudentProfile b = studentRepository.findById(assignment.getStudentBId())
 .orElseThrow(() -> new IllegalArgumentException("not found"));
 
 if (!a.getActive() || !b.getActive()) {
@@ -37,29 +37,29 @@ throw new IllegalArgumentException("both students must be active");
 }
 
 assignment.setAssignedAt(LocalDateTime.now());
-return repo.save(assignment);
+return repository.save(assignment);
 }
 
 @Override
 public RoomAssignmentRecord updateStatus(Long id, String status) {
 RoomAssignmentRecord record = getAssignmentById(id);
 record.setStatus(status);
-return repo.save(record);
+return repository.save(record);
 }
 
 @Override
 public RoomAssignmentRecord getAssignmentById(Long id) {
-return repo.findById(id)
+return repository.findById(id)
 .orElseThrow(() -> new IllegalArgumentException("not found"));
 }
 
 @Override
 public List<RoomAssignmentRecord> getAssignmentsByStudent(Long studentId) {
-return repo.findByStudentAIdOrStudentBId(studentId, studentId);
+return repository.findByStudentAIdOrStudentBId(studentId, studentId);
 }
 
 @Override
 public List<RoomAssignmentRecord> getAllAssignments() {
-return repo.findAll();
+return repository.findAll();
 }
 }

@@ -11,16 +11,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class CompatibilityScoreServiceImpl implements CompatibilityScoreService {
+public class CompatibilityScoreServiceImpl implements CompatibilityScoreService {}
 
-private final CompatibilityScoreRecordRepository scoreRepo;
-private final HabitProfileRepository habitRepo;
+private final CompatibilityScoreRecordRepository scoreRepository;
+private final HabitProfileRepository habitRepository;
 
-public CompatibilityScoreServiceImpl()
-CompatibilityScoreRecordRepository scoreRepo,
-HabitProfileRepository habitRepo) {
-this.scoreRepo = scoreRepo;
-this.habitRepo = habitRepo;
+public CompatibilityScoreServiceImpl(
+CompatibilityScoreRecordRepository scoreRepository,
+HabitProfileRepository habitRepository) {
+this.scoreRepository = scoreRepository;
+this.habitRepository = habitRepository;
 }
 
 @Override
@@ -30,10 +30,10 @@ if (studentAId.equals(studentBId)) {
 throw new IllegalArgumentException("same student");
 }
 
-HabitProfile a = habitRepo.findByStudentId(studentAId)
+HabitProfile a = habitRepository.findByStudentId(studentAId)
 .orElseThrow(() -> new IllegalArgumentException("not found"));
 
-HabitProfile b = habitRepo.findByStudentId(studentBId)
+HabitProfile b = habitRepository.findByStudentId(studentBId)
 .orElseThrow(() -> new IllegalArgumentException("not found"));
 
 double score = 0;
@@ -43,10 +43,11 @@ if (a.getCleanlinessLevel().equals(b.getCleanlinessLevel())) score += 25;
 if (a.getNoiseTolerance().equals(b.getNoiseTolerance())) score += 25;
 if (a.getSocialPreference().equals(b.getSocialPreference())) score += 25;
 
-String level =
-score < 40 ? "LOW" :
-score < 70 ? "MEDIUM" :
-score < 90 ? "HIGH" : "EXCELLENT";
+String level;
+if (score < 40) level = "LOW";
+else if (score < 70) level = "MEDIUM";
+else if (score < 90) level = "HIGH";
+else level = "EXCELLENT";
 
 CompatibilityScoreRecord record = new CompatibilityScoreRecord();
 record.setStudentAId(studentAId);
@@ -56,22 +57,22 @@ record.setCompatibilityLevel(level);
 record.setComputedAt(LocalDateTime.now());
 record.setDetailsJson("{}");
 
-return scoreRepo.save(record);
+return scoreRepository.save(record);
 }
 
 @Override
 public CompatibilityScoreRecord getScoreById(Long id) {
-return scoreRepo.findById(id)
+return scoreRepository.findById(id)
 .orElseThrow(() -> new IllegalArgumentException("not found"));
 }
 
 @Override
 public List<CompatibilityScoreRecord> getScoresForStudent(Long studentId) {
-return scoreRepo.findByStudentAIdOrStudentBId(studentId, studentId);
+return scoreRepository.findByStudentAIdOrStudentBId(studentId, studentId);
 }
 
 @Override
 public List<CompatibilityScoreRecord> getAllScores() {
-return scoreRepo.findAll();
+return scoreRepository.findAll();
 }
 }
