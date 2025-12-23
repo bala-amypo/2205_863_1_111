@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.CompatibilityScoreRecord;
 import com.example.demo.service.CompatibilityScoreService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,26 +20,25 @@ this.service = service;
 }
 
 @PostMapping("/calculate")
-public CompatibilityScoreRecord calculate(
-@RequestParam Long student1Id,
-@RequestParam Long student2Id) {
-
-return service.calculateScore(student1Id, student2Id);
+public ResponseEntity<CompatibilityScoreRecord> calculateScore(
+@RequestParam Long studentAId,
+@RequestParam Long studentBId) {
+return ResponseEntity.ok(service.calculateScore(studentAId, studentBId));
 }
 
 @GetMapping("/{id}")
-public CompatibilityScoreRecord getById(@PathVariable Long id) {
-return service.getScoreById(id);
+public ResponseEntity<CompatibilityScoreRecord> getById(@PathVariable Long id) {
+return ResponseEntity.ok(service.getScoreById(id));
 }
 
 @GetMapping("/student/{studentId}")
-public List<CompatibilityScoreRecord> getForStudent(
+public ResponseEntity<List<CompatibilityScoreRecord>> getScoresForStudent(
 @PathVariable Long studentId) {
-
-return service.getScoresForStudent(studentId);
+return ResponseEntity.ok(service.getScoresForStudent(studentId));
 }
+
 @GetMapping
-public List<CompatibilityScoreRecord> getAll() {
-return service.getAllScores();
+public ResponseEntity<List<CompatibilityScoreRecord>> getAllScores() {
+return ResponseEntity.ok(service.getAllScores());
 }
 }
