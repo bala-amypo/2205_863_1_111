@@ -25,6 +25,7 @@ public class AuthServiceImpl {
     }
 
     public AuthResponse register(AuthRequest request) {
+
         UserAccount user = new UserAccount();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -33,13 +34,28 @@ public class AuthServiceImpl {
 
         repository.save(user);
 
-        return new AuthResponse(jwtUtil.generateToken(user.getUsername()));
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        return new AuthResponse(
+                token,
+                user.getId(),
+                user.getUsername(),
+                user.getRole().name()
+        );
     }
 
     public AuthResponse login(AuthRequest request) {
+
         UserAccount user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("not found"));
 
-        return new AuthResponse(jwtUtil.generateToken(user.getUsername()));
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        return new AuthResponse(
+                token,
+                user.getId(),
+                user.getUsername(),
+                user.getRole().name()
+        );
     }
 }
