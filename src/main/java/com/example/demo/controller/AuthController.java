@@ -1,36 +1,26 @@
 package com.example.demo.controller;
 
-import org.springframework.http.ResponseEntity;
+import com.example.demo.dto.*;
+import com.example.demo.service.AuthService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(
-            @RequestParam String username,
-            @RequestParam String password) {
+    private final AuthService service;
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Login successful");
-        response.put("username", username);
-
-        return ResponseEntity.ok(response);
+    public AuthController(AuthService service) {
+        this.service = service;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(
-            @RequestParam String username,
-            @RequestParam String password) {
+    public AuthResponse register(@RequestBody AuthRequest request) {
+        return service.register(request);
+    }
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "User registered successfully");
-        response.put("username", username);
-
-        return ResponseEntity.ok(response);
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody AuthRequest request) {
+        return service.login(request);
     }
 }
