@@ -1,59 +1,22 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "match_attempts")
 public class MatchAttemptRecord {
 
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
+    public enum Status { SUCCESS, FAILED }
 
-private Long initiatorStudentId;
-private Long candidateStudentId;
-private Long resultScoreId;
-private String status;
-private LocalDateTime attemptedAt = LocalDateTime.now();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-public Long getId() {
-return id;
-}
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
-public Long getInitiatorStudentId() {
-return initiatorStudentId;
-}
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-public void setInitiatorStudentId(Long initiatorStudentId) {
-this.initiatorStudentId = initiatorStudentId;
-}
-
-public Long getCandidateStudentId() {
-return candidateStudentId;
-}
-
-public void setCandidateStudentId(Long candidateStudentId) {
-this.candidateStudentId = candidateStudentId;
-}
-
-public Long getResultScoreId() {
-return resultScoreId;
-}
-
-public void setResultScoreId(Long resultScoreId) {
-this.resultScoreId = resultScoreId;
-}
-
-public String getStatus() {
-return status;
-}
-
-public void setStatus(String status) {
-this.status = status;
-}
-
-public LocalDateTime getAttemptedAt() {
-return attemptedAt;
-}
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 }
