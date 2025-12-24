@@ -2,20 +2,19 @@ package com.example.demo.dto;
 
 public class AuthResponse {
 
-    private String token;
-    private Long userId;
-    private String username;
-    private String role;
+    private int statusCodeValue;
+    private String message;
 
-    public AuthResponse(String token, Long userId, String username, String role) {
-        this.token = token;
-        this.userId = userId;
-        this.username = username;
-        this.role = role;
+    public AuthResponse(String message) {
+        this.message = message;
+        this.statusCodeValue = 200;
     }
 
-    public String getToken() { return token; }
-    public Long getUserId() { return userId; }
-    public String getUsername() { return username; }
-    public String getRole() { return role; }
+    public int getStatusCodeValue() {
+        return statusCodeValue;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }
