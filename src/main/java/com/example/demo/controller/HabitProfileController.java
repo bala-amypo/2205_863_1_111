@@ -17,15 +17,12 @@ public class HabitProfileController {
     }
 
     @PostMapping
-    public HabitProfile saveOne(@RequestBody HabitProfile habit) {
+    public HabitProfile createOrUpdate(@RequestBody HabitProfile habit) {
         return service.createOrUpdateHabit(habit);
     }
-
-    @PostMapping("/bulk")
-    public List<HabitProfile> saveAll(@RequestBody List<HabitProfile> habits) {
-        return habits.stream()
-                .map(service::createOrUpdateHabit)
-                .toList();
+    @GetMapping("/student/{studentId}")
+    public HabitProfile getByStudent(@PathVariable Long studentId) {
+        return service.getHabitByStudent(studentId);
     }
 
     @GetMapping("/{id}")
@@ -33,11 +30,7 @@ public class HabitProfileController {
         return service.getHabitById(id);
     }
 
-    @GetMapping("/student/{studentId}")
-    public HabitProfile getByStudent(@PathVariable Long studentId) {
-        return service.getHabitByStudent(studentId);
-    }
-
+   
     @GetMapping
     public List<HabitProfile> getAll() {
         return service.getAllHabitProfiles();

@@ -1,4 +1,3 @@
-// com/example/demo/controller/MatchAttemptController.java
 package com.example.demo.controller;
 
 import com.example.demo.model.MatchAttemptRecord;
@@ -11,35 +10,41 @@ import java.util.List;
 @RequestMapping("/api/match-attempts")
 public class MatchAttemptController {
 
-private final MatchAttemptService service;
+    private final MatchAttemptService service;
 
-public MatchAttemptController(MatchAttemptService service) {
-this.service = service;
-}
+    public MatchAttemptController(MatchAttemptService service) {
+        this.service = service;
+    }
 
-@PostMapping
-public MatchAttemptRecord log(@RequestBody MatchAttemptRecord record) {
-return service.logMatchAttempt(record);
-}
+    // POST /
+    @PostMapping
+    public MatchAttemptRecord log(@RequestBody MatchAttemptRecord record) {
+        return service.logMatchAttempt(record);
+    }
 
-@PutMapping("/{id}/status")
-public MatchAttemptRecord updateStatus(@PathVariable Long id,
-@RequestParam String status) {
-return service.updateAttemptStatus(id, status);
-}
+    // PUT /{id}/status
+    @PutMapping("/{id}/status")
+    public MatchAttemptRecord updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        return service.updateAttemptStatus(id, status);
+    }
 
-@GetMapping("/{id}")
-public MatchAttemptRecord getById(@PathVariable Long id) {
-return service.getAttemptsByStudent(id).get(0);
-}
+    // GET /student/{studentId}
+    @GetMapping("/student/{studentId}")
+    public List<MatchAttemptRecord> getByStudent(@PathVariable Long studentId) {
+        return service.getAttemptsByStudent(studentId);
+    }
 
-@GetMapping("/student/{studentId}")
-public List<MatchAttemptRecord> getByStudent(@PathVariable Long studentId) {
-return service.getAttemptsByStudent(studentId);
-}
+    // GET /{id}
+    @GetMapping("/{id}")
+    public MatchAttemptRecord getById(@PathVariable Long id) {
+        return service.getAttemptById(id);
+    }
 
-@GetMapping
-public List<MatchAttemptRecord> getAll() {
-return service.getAllMatchAttempts();
-}
+    // GET /
+    @GetMapping
+    public List<MatchAttemptRecord> getAll() {
+        return service.getAllMatchAttempts();
+    }
 }
