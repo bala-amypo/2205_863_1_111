@@ -1,8 +1,8 @@
-// com/example/demo/controller/StudentProfileController.java
 package com.example.demo.controller;
 
 import com.example.demo.model.StudentProfile;
 import com.example.demo.service.StudentProfileService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,34 +11,36 @@ import java.util.List;
 @RequestMapping("/api/students")
 public class StudentProfileController {
 
-private final StudentProfileService service;
+    private final StudentProfileService service;
 
-public StudentProfileController(StudentProfileService service) {
-this.service = service;
-}
+    public StudentProfileController(StudentProfileService service) {
+        this.service = service;
+    }
 
-@PostMapping
-public StudentProfile create(@RequestBody StudentProfile profile) {
-return service.createStudent(profile);
-}
+    @PostMapping
+    public StudentProfile createStudent(@Valid @RequestBody StudentProfile profile) {
+        return service.createStudent(profile);
+    }
 
-@GetMapping("/{id}")
-public StudentProfile getById(@PathVariable Long id) {
-return service.getStudentById(id);
-}
+    @GetMapping("/{id}")
+    public StudentProfile getById(@PathVariable Long id) {
+        return service.getStudentById(id);
+    }
 
-@GetMapping
-public List<StudentProfile> getAll() {
-return service.getAllStudents();
-}
+    @GetMapping
+    public List<StudentProfile> getAll() {
+        return service.getAllStudents();
+    }
 
-@PutMapping("/{id}/status")
-public StudentProfile updateStatus(@PathVariable Long id, @RequestParam boolean active) {
-return service.updateStudentStatus(id, active);
-}
+    @PutMapping("/{id}/status")
+    public StudentProfile updateStatus(
+            @PathVariable Long id,
+            @RequestParam boolean active) {
+        return service.updateStudentStatus(id, active);
+    }
 
-@GetMapping("/lookup/{studentId}")
-public StudentProfile findByStudentId(@PathVariable String studentId) {
-return service.findByStudentId(studentId);
-}
+    @GetMapping("/lookup/{studentId}")
+    public StudentProfile getByStudentId(@PathVariable String studentId) {
+        return service.findByStudentId(studentId);
+    }
 }
