@@ -6,11 +6,12 @@ import com.example.demo.model.UserAccount;
 import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtUtil;
 import com.example.demo.security.Role;
+import com.example.demo.service.AuthService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthServiceImpl {
+public class AuthServiceImpl implements AuthService {
 
     private final UserAccountRepository repository;
     private final JwtUtil jwtUtil;
@@ -24,6 +25,7 @@ public class AuthServiceImpl {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Override
     public AuthResponse register(AuthRequest request) {
 
         UserAccount user = new UserAccount();
@@ -44,10 +46,11 @@ public class AuthServiceImpl {
         );
     }
 
+    @Override
     public AuthResponse login(AuthRequest request) {
 
         UserAccount user = repository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
 
         String token = jwtUtil.generateToken(user.getEmail());
 
