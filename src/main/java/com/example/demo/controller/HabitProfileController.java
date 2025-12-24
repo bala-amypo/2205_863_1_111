@@ -1,4 +1,3 @@
-// com/example/demo/controller/HabitProfileController.java
 package com.example.demo.controller;
 
 import com.example.demo.model.HabitProfile;
@@ -11,29 +10,36 @@ import java.util.List;
 @RequestMapping("/api/habits")
 public class HabitProfileController {
 
-private final HabitProfileService service;
+    private final HabitProfileService service;
 
-public HabitProfileController(HabitProfileService service) {
-this.service = service;
-}
+    public HabitProfileController(HabitProfileService service) {
+        this.service = service;
+    }
 
-@PostMapping
-public HabitProfile createOrUpdate(@RequestBody HabitProfile habit) {
-return service.createOrUpdateHabit(habit);
-}
+    @PostMapping
+    public HabitProfile saveOne(@RequestBody HabitProfile habit) {
+        return service.createOrUpdateHabit(habit);
+    }
 
-@GetMapping("/student/{studentId}")
-public HabitProfile getByStudent(@PathVariable Long studentId) {
-return service.getHabitByStudent(studentId);
-}
+    @PostMapping("/bulk")
+    public List<HabitProfile> saveAll(@RequestBody List<HabitProfile> habits) {
+        return habits.stream()
+                .map(service::createOrUpdateHabit)
+                .toList();
+    }
 
-@GetMapping("/{id}")
-public HabitProfile getById(@PathVariable Long id) {
-return service.getHabitById(id);
-}
+    @GetMapping("/{id}")
+    public HabitProfile getById(@PathVariable Long id) {
+        return service.getHabitById(id);
+    }
 
-@GetMapping
-public List<HabitProfile> getAll() {
-return service.getAllHabitProfiles();
-}
+    @GetMapping("/student/{studentId}")
+    public HabitProfile getByStudent(@PathVariable Long studentId) {
+        return service.getHabitByStudent(studentId);
+    }
+
+    @GetMapping
+    public List<HabitProfile> getAll() {
+        return service.getAllHabitProfiles();
+    }
 }
