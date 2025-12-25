@@ -2,7 +2,6 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Max;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -24,15 +23,15 @@ public class HabitProfile {
     private LocalTime sleepTime;
     private LocalTime wakeTime;
 
-    @Min(1)
-    @Max(5)
-    private Integer cleanlinessLevel;
+    @Enumerated(EnumType.STRING)
+    private CleanlinessLevel cleanlinessLevel;
 
-    @Min(1)
-    @Max(5)
-    private Integer noisePreference;
+    @Enumerated(EnumType.STRING)
+    private NoiseTolerance noiseTolerance;
 
-    private String socialPreference;
+    @Enumerated(EnumType.STRING)
+    private SocialPreference socialPreference;
+
     private String studyStyle;
     private String visitorsFrequency;
 
@@ -44,7 +43,9 @@ public class HabitProfile {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-    
+
+    /* ================= ENUMS ================= */
+
     public enum SleepSchedule {
         EARLY, REGULAR, LATE
     }
@@ -61,9 +62,11 @@ public class HabitProfile {
         INTROVERT, BALANCED, EXTROVERT
     }
 
+    /* ============== CONSTRUCTOR ============== */
 
     public HabitProfile() {}
 
+    /* ============== GETTERS & SETTERS ============== */
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -83,18 +86,27 @@ public class HabitProfile {
     public LocalTime getWakeTime() { return wakeTime; }
     public void setWakeTime(LocalTime wakeTime) { this.wakeTime = wakeTime; }
 
-    public Integer getCleanlinessLevel() { return cleanlinessLevel; }
-    public void setCleanlinessLevel(Integer cleanlinessLevel) {
+    public CleanlinessLevel getCleanlinessLevel() {
+        return cleanlinessLevel;
+    }
+
+    public void setCleanlinessLevel(CleanlinessLevel cleanlinessLevel) {
         this.cleanlinessLevel = cleanlinessLevel;
     }
 
-    public Integer getNoisePreference() { return noisePreference; }
-    public void setNoisePreference(Integer noisePreference) {
-        this.noisePreference = noisePreference;
+    public NoiseTolerance getNoiseTolerance() {
+        return noiseTolerance;
     }
 
-    public String getSocialPreference() { return socialPreference; }
-    public void setSocialPreference(String socialPreference) {
+    public void setNoiseTolerance(NoiseTolerance noiseTolerance) {
+        this.noiseTolerance = noiseTolerance;
+    }
+
+    public SocialPreference getSocialPreference() {
+        return socialPreference;
+    }
+
+    public void setSocialPreference(SocialPreference socialPreference) {
         this.socialPreference = socialPreference;
     }
 
@@ -117,4 +129,8 @@ public class HabitProfile {
     }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
