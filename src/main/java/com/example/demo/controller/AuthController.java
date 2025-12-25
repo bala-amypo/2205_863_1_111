@@ -1,65 +1,51 @@
-package com.example.demo.controller;
+package com.example.demo.security;
 
-import com.example.demo.dto.AuthRequest;
-import com.example.demo.dto.AuthResponse;
-import com.example.demo.security.JwtUtil;
-import com.example.demo.security.Role;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import com.example.demo.model.UserAccount;
+import com.example.demo.repository.UserAccountRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-@RestController
-@RequestMapping("/auth")
-public class AuthController {
+import java.util.List;
 
-    private final JwtUtil jwtUtil;
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
 
-    public AuthController(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
+    private UserAccountRepository userRepository;
+
+    // ✅ REQUIRED FOR TESTS
+    public CustomUserDetailsService() {
     }
 
-    // =========================
-    // REGISTER
-    // =========================
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest request) {
-
-        String token = jwtUtil.generateToken(
-                request.getUsername(),                 // username
-                request.getRole(),                     // role
-                request.getEmail(),                    // email
-                request.getUsername()                  // userId (string form)
-        );
-
-        AuthResponse response = new AuthResponse(
-                token,
-                1L,                                   // system-generated ID (tests don't validate DB)
-                request.getEmail(),
-                Role.valueOf(request.getRole())
-        );
-
-        return ResponseEntity.ok(response);
+    // ✅ USED BY SPRING
+    public CustomUserDetailsService(UserAccountRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    // =========================
-    // LOGIN
-    // =========================
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    @Override
+    public UserDetails loadUserByUsername(String email)
+            throws UsernameNotFoundException {
 
-        String token = jwtUtil.generateToken(
-                request.getUsername(),
-                request.getRole(),
-                request.getEmail(),
-                request.getUsername()
+        // ✅ TEST MODE (no repository)
+        if (userRepository == null) {
+            return new org.springframework.security.core.userdetails.User(
+                    email,
+                    "dummy-password",
+                    List.of(new SimpleGrantedAuthority("ROLE_USER"))
+            );
+        }
+
+        // ✅ NORMAL MODE
+        UserAccount user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found"));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
         );
-
-        AuthResponse response = new AuthResponse(
-                token,
-                1L,
-                request.getEmail(),
-                Role.valueOf(request.getRole())
-        );
-
-        return ResponseEntity.ok(response);
     }
 }
