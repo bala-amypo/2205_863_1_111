@@ -16,11 +16,13 @@ public class MatchAttemptController {
         this.service = service;
     }
 
+    // POST /api/match-attempts
     @PostMapping
     public MatchAttemptRecord log(@RequestBody MatchAttemptRecord record) {
         return service.logMatchAttempt(record);
     }
 
+    // PUT /api/match-attempts/{id}/status
     @PutMapping("/{id}/status")
     public MatchAttemptRecord updateStatus(
             @PathVariable Long id,
@@ -28,17 +30,14 @@ public class MatchAttemptController {
         return service.updateAttemptStatus(id, status);
     }
 
+    // GET /api/match-attempts/student/{studentId}
     @GetMapping("/student/{studentId}")
     public List<MatchAttemptRecord> getByStudent(
             @PathVariable Long studentId) {
         return service.getAttemptsByStudent(studentId);
     }
 
-    @GetMapping("/{id}")
-    public MatchAttemptRecord getById(@PathVariable Long id) {
-        return service.getMatchAttemptById(id);
-    }
-
+    // GET /api/match-attempts
     @GetMapping
     public List<MatchAttemptRecord> getAll() {
         return service.getAllMatchAttempts();
