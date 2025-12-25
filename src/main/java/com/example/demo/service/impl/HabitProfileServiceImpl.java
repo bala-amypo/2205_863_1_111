@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Service
 public class HabitProfileServiceImpl implements HabitProfileService {
-    
+
     private final HabitProfileRepository habitRepo;
 
     public HabitProfileServiceImpl(HabitProfileRepository habitRepo) {
@@ -20,21 +20,31 @@ public class HabitProfileServiceImpl implements HabitProfileService {
 
     @Override
     public HabitProfile createOrUpdateHabit(HabitProfile habit) {
+
         if (habit.getStudyHoursPerDay() != null && habit.getStudyHoursPerDay() < 0) {
             throw new IllegalArgumentException("study hours must be >= 0");
         }
-        
+
         Optional<HabitProfile> existing = habitRepo.findByStudentId(habit.getStudentId());
+
         if (existing.isPresent()) {
             HabitProfile existingHabit = existing.get();
+
             existingHabit.setStudyHoursPerDay(habit.getStudyHoursPerDay());
             existingHabit.setSleepSchedule(habit.getSleepSchedule());
-            existingHabit.setCleanlinessLevelEnum(habit.getCleanlinessLevelEnum());
-            existingHabit.setNoiseTolerance(habit.getNoiseTolerance());
-            existingHabit.setSocialPreferenceEnum(habit.getSocialPreferenceEnum());
+            existingHabit.setCleanlinessLevel(habit.getCleanlinessLevel());
+            existingHabit.setNoisePreference(habit.getNoisePreference());
+            existingHabit.setSocialPreference(habit.getSocialPreference());
+            existingHabit.setStudyStyle(habit.getStudyStyle());
+            existingHabit.setVisitorsFrequency(habit.getVisitorsFrequency());
+            existingHabit.setSmoking(habit.getSmoking());
+            existingHabit.setDrinking(habit.getDrinking());
+            existingHabit.setSleepTime(habit.getSleepTime());
+            existingHabit.setWakeTime(habit.getWakeTime());
+
             return habitRepo.save(existingHabit);
         }
-        
+
         return habitRepo.save(habit);
     }
 
