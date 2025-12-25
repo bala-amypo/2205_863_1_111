@@ -1,91 +1,82 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.AuthRequest;
-import com.example.demo.dto.AuthResponse;
+import com.example.demo.model.UserAccount;
+import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtUtil;
-import com.example.demo.security.Role;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final JwtUtil jwtUtil;
+    private final UserAccountRepository userRepository;
 
-    // ✅ INSTANCE-LEVEL storage (NOT static)
-    private final Set<String> registeredUsers =
-            ConcurrentHashMap.newKeySet();
-
-    public AuthController(JwtUtil jwtUtil) {
+    public AuthController(JwtUtil jwtUtil, UserAccountRepository userRepository) {
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
-    // =========================
-    // REGISTER
-    // =========================
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody AuthRequest request) {
 
-        String username = request.getUsername();
-
-        // Duplicate check (t102)
-        if (username != null && registeredUsers.contains(username)) {
-            return ResponseEntity.badRequest().build();
+        // 1️⃣ Check if user already exists
+        if (userRepository.existsByUsername(request.getUsername())) {
+            return ResponseEntity.badRequest().body("Username already exists");
         }
 
-        if (username != null) {
-            registeredUsers.add(username);
-        }
+        // 2️⃣ Convert DTO → Entity
+        UserAccount user = new UserAccount();
+        user.setUsername(request.getUsername());
+        user.setPassword(request.getPassword()); // BCrypt later
+        user.setEmail(request.getEmail());
+        user.setRole(
+                request.getRole() != null ? request.getRole() : "USER"
+        );
 
-        String role = request.getRole() == null
-                ? "STUDENT_VIEWER"
-                : request.getRole();
+        // 3️⃣ Save user
+        UserAccount savedUser = userRepository.save(user);
 
+        // 4️⃣ Generate JWT
         String token = jwtUtil.generateToken(
-                username,
-                role,
-                request.getEmail(),
-                username
+                savedUser.getUsername(),
+                savedUser.getRole(),
+                savedUser.getEmail(),
+                savedUser.getId().toString()
         );
 
-        AuthResponse response = new AuthResponse(
-                token,
-                1L,
-                request.getEmail(),
-                Role.valueOf(role)
+        // 5️⃣ Return response
+        return ResponseEntity.ok(
+                Map.of(
+                        "message", "User registered successfully",
+                        "token", token
+                )
         );
-
-        return ResponseEntity.ok(response);
     }
 
-    // =========================
-    // LOGIN
-    // =========================
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
 
-        String role = request.getRole() == null
-                ? "STUDENT_VIEWER"
-                : request.getRole();
+        UserAccount user = userRepository
+                .findByUsername(request.getUsername())
+                .orElse(null);
+
+        if (user == null || !user.getPassword().equals(request.getPassword())) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
 
         String token = jwtUtil.generateToken(
-                request.getUsername(),
-                role,
-                request.getEmail(),
-                request.getUsername()
+                user.getUsername(),
+                user.getRole(),
+                user.getEmail(),
+                user.getId().toString()
         );
 
-        AuthResponse response = new AuthResponse(
-                token,
-                1L,
-                request.getEmail(),
-                Role.valueOf(role)
-        );
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("token", token));
     }
 }
