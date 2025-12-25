@@ -1,6 +1,5 @@
 package com.example.demo.dto;
 
-import com.example.demo.model.StudentProfile.RoomTypePreference;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
@@ -16,7 +15,7 @@ public class StudentProfileDto {
     private String course;
     private Integer yearOfStudy;
     private String gender;
-    private RoomTypePreference roomTypePreference;
+    private String roomTypePreference;
     private LocalTime sleepTime;
     private LocalTime wakeTime;
     private Boolean smoking;
@@ -42,8 +41,8 @@ public class StudentProfileDto {
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
 
-    public RoomTypePreference getRoomTypePreference() { return roomTypePreference; }
-    public void setRoomTypePreference(RoomTypePreference roomTypePreference) { this.roomTypePreference = roomTypePreference; }
+    public String getRoomTypePreference() { return roomTypePreference; }
+    public void setRoomTypePreference(String roomTypePreference) { this.roomTypePreference = roomTypePreference; }
 
     public LocalTime getSleepTime() { return sleepTime; }
     public void setSleepTime(LocalTime sleepTime) { this.sleepTime = sleepTime; }
