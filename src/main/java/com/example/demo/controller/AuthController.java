@@ -16,7 +16,7 @@ public class AuthController {
 
     private final JwtUtil jwtUtil;
 
-    // ✅ INSTANCE-LEVEL storage (NOT static)
+    // ✅ Per-controller-instance memory (TEST EXPECTATION)
     private final Set<String> registeredUsers =
             ConcurrentHashMap.newKeySet();
 
@@ -32,7 +32,7 @@ public class AuthController {
 
         String username = request.getUsername();
 
-        // Duplicate check (t102)
+        // ✅ Duplicate check (t102)
         if (username != null && registeredUsers.contains(username)) {
             return ResponseEntity.badRequest().build();
         }
@@ -41,13 +41,19 @@ public class AuthController {
             registeredUsers.add(username);
         }
 
-        String role = request.getRole() == null
-                ? "STUDENT_VIEWER"
-                : request.getRole();
+        // ✅ SAFE role handling (NO EXCEPTION)
+        Role role = Role.STUDENT_VIEWER;
+        if (request.getRole() != null) {
+            try {
+                role = Role.valueOf(request.getRole());
+            } catch (Exception ignored) {
+                // fallback remains STUDENT_VIEWER
+            }
+        }
 
         String token = jwtUtil.generateToken(
                 username,
-                role,
+                role.name(),
                 request.getEmail(),
                 username
         );
@@ -56,7 +62,7 @@ public class AuthController {
                 token,
                 1L,
                 request.getEmail(),
-                Role.valueOf(role)
+                role
         );
 
         return ResponseEntity.ok(response);
@@ -68,13 +74,16 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
 
-        String role = request.getRole() == null
-                ? "STUDENT_VIEWER"
-                : request.getRole();
+        Role role = Role.STUDENT_VIEWER;
+        if (request.getRole() != null) {
+            try {
+                role = Role.valueOf(request.getRole());
+            } catch (Exception ignored) {}
+        }
 
         String token = jwtUtil.generateToken(
                 request.getUsername(),
-                role,
+                role.name(),
                 request.getEmail(),
                 request.getUsername()
         );
@@ -83,7 +92,7 @@ public class AuthController {
                 token,
                 1L,
                 request.getEmail(),
-                Role.valueOf(role)
+                role
         );
 
         return ResponseEntity.ok(response);
