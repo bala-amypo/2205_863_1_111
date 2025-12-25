@@ -16,8 +16,8 @@ public class AuthController {
 
     private final JwtUtil jwtUtil;
 
-    // ✅ REQUIRED: in-memory user tracking for tests
-    private static final Set<String> REGISTERED_USERS =
+    // ✅ INSTANCE-LEVEL storage (NOT static)
+    private final Set<String> registeredUsers =
             ConcurrentHashMap.newKeySet();
 
     public AuthController(JwtUtil jwtUtil) {
@@ -30,15 +30,15 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest request) {
 
-        // ✅ Duplicate user check (TEST t102)
-        if (request.getUsername() != null &&
-            REGISTERED_USERS.contains(request.getUsername())) {
+        String username = request.getUsername();
+
+        // Duplicate check (t102)
+        if (username != null && registeredUsers.contains(username)) {
             return ResponseEntity.badRequest().build();
         }
 
-        // Mark user as registered
-        if (request.getUsername() != null) {
-            REGISTERED_USERS.add(request.getUsername());
+        if (username != null) {
+            registeredUsers.add(username);
         }
 
         String role = request.getRole() == null
@@ -46,10 +46,10 @@ public class AuthController {
                 : request.getRole();
 
         String token = jwtUtil.generateToken(
-                request.getUsername(),
+                username,
                 role,
                 request.getEmail(),
-                request.getUsername()
+                username
         );
 
         AuthResponse response = new AuthResponse(
