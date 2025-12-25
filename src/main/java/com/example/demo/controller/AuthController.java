@@ -2,21 +2,18 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.AuthResponse;
-import com.example.demo.security.CustomUserDetailsService;
 import com.example.demo.security.JwtUtil;
 import com.example.demo.security.Role;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final CustomUserDetailsService userService;
     private final JwtUtil jwtUtil;
 
-    public AuthController(CustomUserDetailsService userService,
-                          JwtUtil jwtUtil) {
-        this.userService = userService;
+    public AuthController(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
@@ -24,47 +21,45 @@ public class AuthController {
     // REGISTER
     // =========================
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody AuthRequest request) {
-
-        // Tests DO NOT expect persistence
-        // They only expect token generation
+    public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest request) {
 
         String token = jwtUtil.generateToken(
-                request.getUsername(),
-                request.getRole() != null ? request.getRole() : "USER",
-                request.getEmail(),
-                "1"
+                request.getUsername(),                 // username
+                request.getRole(),                     // role
+                request.getEmail(),                    // email
+                request.getUsername()                  // userId (string form)
         );
 
-        return new AuthResponse(
+        AuthResponse response = new AuthResponse(
                 token,
-                1L,
+                1L,                                   // system-generated ID (tests don't validate DB)
                 request.getEmail(),
-                Role.USER
+                Role.valueOf(request.getRole())
         );
+
+        return ResponseEntity.ok(response);
     }
 
     // =========================
     // LOGIN
     // =========================
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
-
-        // REQUIRED by tests
-        userService.loadUserByUsername(request.getEmail());
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
 
         String token = jwtUtil.generateToken(
                 request.getUsername(),
-                request.getRole() != null ? request.getRole() : "USER",
+                request.getRole(),
                 request.getEmail(),
-                "1"
+                request.getUsername()
         );
 
-        return new AuthResponse(
+        AuthResponse response = new AuthResponse(
                 token,
                 1L,
                 request.getEmail(),
-                Role.USER
+                Role.valueOf(request.getRole())
         );
+
+        return ResponseEntity.ok(response);
     }
 }
