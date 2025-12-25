@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.MatchAttemptRecord;
 import com.example.demo.service.MatchAttemptService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,30 +17,20 @@ public class MatchAttemptController {
         this.service = service;
     }
 
-    // POST /api/match-attempts
     @PostMapping
-    public MatchAttemptRecord log(@RequestBody MatchAttemptRecord record) {
-        return service.logMatchAttempt(record);
+    public ResponseEntity<MatchAttemptRecord> log(@RequestBody MatchAttemptRecord record) {
+        return ResponseEntity.ok(service.logMatchAttempt(record));
     }
 
-    // PUT /api/match-attempts/{id}/status
     @PutMapping("/{id}/status")
-    public MatchAttemptRecord updateStatus(
+    public ResponseEntity<MatchAttemptRecord> updateStatus(
             @PathVariable Long id,
             @RequestParam String status) {
-        return service.updateAttemptStatus(id, status);
+        return ResponseEntity.ok(service.updateAttemptStatus(id, status));
     }
 
-    // GET /api/match-attempts/student/{studentId}
-    @GetMapping("/student/{studentId}")
-    public List<MatchAttemptRecord> getByStudent(
-            @PathVariable Long studentId) {
-        return service.getAttemptsByStudent(studentId);
-    }
-
-    // GET /api/match-attempts
     @GetMapping
-    public List<MatchAttemptRecord> getAll() {
-        return service.getAllMatchAttempts();
+    public ResponseEntity<List<MatchAttemptRecord>> getAll() {
+        return ResponseEntity.ok(service.getAllMatchAttempts());
     }
 }

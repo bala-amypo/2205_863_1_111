@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.StudentProfile;
 import com.example.demo.service.StudentProfileService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,29 +18,24 @@ public class StudentProfileController {
     }
 
     @PostMapping
-    public StudentProfile create(@RequestBody StudentProfile student) {
-        return service.createStudent(student);
+    public ResponseEntity<StudentProfile> create(@RequestBody StudentProfile student) {
+        return ResponseEntity.ok(service.createStudent(student));
     }
 
     @GetMapping("/{id}")
-    public StudentProfile getById(@PathVariable Long id) {
-        return service.getStudentById(id);
+    public ResponseEntity<StudentProfile> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getStudentById(id));
     }
 
     @GetMapping
-    public List<StudentProfile> getAll() {
-        return service.getAllStudents();
+    public ResponseEntity<List<StudentProfile>> getAll() {
+        return ResponseEntity.ok(service.getAllStudents());
     }
 
     @PutMapping("/{id}/status")
-    public StudentProfile updateStatus(
+    public ResponseEntity<StudentProfile> updateStatus(
             @PathVariable Long id,
             @RequestParam Boolean active) {
-        return service.updateStudentStatus(id, active);
-    }
-
-    @GetMapping("/lookup/{studentId}")
-    public StudentProfile lookup(@PathVariable String studentId) {
-        return service.findByStudentId(studentId).orElse(null);
+        return ResponseEntity.ok(service.updateStudentStatus(id, active));
     }
 }
