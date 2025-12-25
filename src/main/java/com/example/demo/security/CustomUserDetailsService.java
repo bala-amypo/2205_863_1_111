@@ -13,17 +13,26 @@ import java.util.List;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserAccountRepository userRepository;
+    private UserAccountRepository userRepository;
 
+    // ✅ REQUIRED FOR TESTS
+    public CustomUserDetailsService() {
+    }
+
+    // ✅ USED BY SPRING
     public CustomUserDetailsService(UserAccountRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username)
+    public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        UserAccount user = userRepository.findByUsername(username)
+        if (userRepository == null) {
+            throw new UsernameNotFoundException("Repository not initialized");
+        }
+
+        UserAccount user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found"));
 
@@ -31,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 new SimpleGrantedAuthority("ROLE_" + user.getRole());
 
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
+                user.getEmail(),
                 user.getPassword(),
                 List.of(authority)
         );
