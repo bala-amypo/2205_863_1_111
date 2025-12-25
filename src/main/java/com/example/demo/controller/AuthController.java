@@ -1,69 +1,61 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.AuthRequest;
 import com.example.demo.model.UserAccount;
 import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtUtil;
+import com.example.demo.security.Role;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
+    
+    private final UserAccountRepository repository;
     private final JwtUtil jwtUtil;
-    private final UserAccountRepository userRepository;
 
-    public AuthController(JwtUtil jwtUtil, UserAccountRepository userRepository) {
+    public AuthController(UserAccountRepository repository, JwtUtil jwtUtil) {
+        this.repository = repository;
         this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
     }
 
+    /* ================= CREATE (REGISTER) ================= */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody AuthRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody UserAccount request) {
 
-        // 1️⃣ Check if user already exists
-        if (userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.badRequest().body("Username already exists");
+        if (repository.existsByEmail(request.getEmail())) {
+            return ResponseEntity.badRequest().body("Email already exists");
         }
 
-        // 2️⃣ Convert DTO → Entity
-        UserAccount user = new UserAccount();
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword()); // BCrypt later
-        user.setEmail(request.getEmail());
-        user.setRole(
-                request.getRole() != null ? request.getRole() : "USER"
+        request.setRole(
+                request.getRole() != null ? request.getRole() : Role.USER
         );
 
-        // 3️⃣ Save user
-        UserAccount savedUser = userRepository.save(user);
+        UserAccount saved = repository.saveAndFlush(request);
 
-        // 4️⃣ Generate JWT
         String token = jwtUtil.generateToken(
-                savedUser.getUsername(),
-                savedUser.getRole(),
-                savedUser.getEmail(),
-                savedUser.getId().toString()
+                saved.getEmail(),
+                saved.getRole().name(),
+                saved.getEmail(),
+                saved.getId().toString()
         );
 
-        // 5️⃣ Return response
-        return ResponseEntity.ok(
-                Map.of(
-                        "message", "User registered successfully",
-                        "token", token
-                )
-        );
+        return ResponseEntity.ok(Map.of(
+                "message", "User registered",
+                "token", token
+        ));
     }
 
+    /* ================= LOGIN ================= */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody UserAccount request) {
 
-        UserAccount user = userRepository
-                .findByUsername(request.getUsername())
+        UserAccount user = repository.findByEmail(request.getEmail())
                 .orElse(null);
 
         if (user == null || !user.getPassword().equals(request.getPassword())) {
@@ -71,12 +63,53 @@ public class AuthController {
         }
 
         String token = jwtUtil.generateToken(
-                user.getUsername(),
-                user.getRole(),
+                user.getEmail(),
+                user.getRole().name(),
                 user.getEmail(),
                 user.getId().toString()
         );
 
         return ResponseEntity.ok(Map.of("token", token));
+    }
+
+    /* ================= READ ================= */
+    @GetMapping("/{id}")
+    public UserAccount getById(@PathVariable Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @GetMapping
+    public List<UserAccount> getAll() {
+        return repository.findAll();
+    }
+
+    /* ================= UPDATE ================= */
+    @PutMapping("/{id}")
+    public UserAccount update(
+            @PathVariable Long id,
+            @RequestBody UserAccount updated) {
+
+        UserAccount existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        existing.setEmail(updated.getEmail());
+        existing.setPassword(updated.getPassword());
+        existing.setRole(updated.getRole());
+        existing.setActive(updated.isActive());
+
+        return repository.save(existing);
+    }
+
+    /* ================= DELETE ================= */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+
+        if (!repository.existsById(id)) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        repository.deleteById(id);
+        return ResponseEntity.ok("User deleted successfully");
     }
 }
