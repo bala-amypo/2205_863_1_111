@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        String username = jwtUtil.extractUsername(token);
+        String username = jwtUtil.getUsernameFromToken(token);
 
         if (username != null &&
             SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -49,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails =
                     userDetailsService.loadUserByUsername(username);
 
-            if (jwtUtil.validateToken(token, userDetails)) {
+             if(jwtUtil.validateToken(token, userDetails.getUsername())){
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -62,8 +62,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                SecurityContextHolder
-                        .getContext()
+                // ✅ THIS LINE MAKES AUTH WORK
+                SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
             }
         }
