@@ -8,31 +8,32 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 @Table(name = "user_accounts")
 public class UserAccount {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Email
     @NotBlank
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String email;
 
     @NotBlank
-    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role role = Role.USER;
 
-    @Column(nullable = false)
     private boolean active = true;
 
     public UserAccount() {}
 
-    /* Getters & Setters */
+    public UserAccount(String email, String password, Role role) {
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
 
+    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
