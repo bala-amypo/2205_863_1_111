@@ -1,29 +1,50 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.HabitProfile;
-import com.example.demo.service.HabitProfileService;
-import org.springframework.http.ResponseEntity;
+import com.example.demo.model.StudentProfile;
+import com.example.demo.service.StudentProfileService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/habits")
-public class HabitProfileController {
-    
-    private final HabitProfileService habitService;
+@RequestMapping("/api/students")
+public class StudentProfileController {
 
-    public HabitProfileController(HabitProfileService habitService) {
-        this.habitService = habitService;
+    private final StudentProfileService service;
+
+    public StudentProfileController(StudentProfileService service) {
+        this.service = service;
     }
 
-    @GetMapping("/{studentId}")
-    public ResponseEntity<HabitProfile> getByStudent(@PathVariable Long studentId) {
-        HabitProfile habit = habitService.getHabitByStudent(studentId);
-        return ResponseEntity.ok(habit);
-    }
-
+    // POST /api/students
     @PostMapping
-    public ResponseEntity<HabitProfile> create(@RequestBody HabitProfile habit) {
-        HabitProfile created = habitService.createOrUpdateHabit(habit);
-        return ResponseEntity.ok(created);
+    public StudentProfile createStudent(@RequestBody StudentProfile student) {
+        return service.createStudent(student);
+    }
+
+    // GET /api/students/{id}
+    @GetMapping("/{id}")
+    public StudentProfile getById(@PathVariable Long id) {
+        return service.getStudentById(id);
+    }
+
+    // GET /api/students
+    @GetMapping
+    public List<StudentProfile> getAll() {
+        return service.getAllStudents();
+    }
+
+    // PUT /api/students/{id}/status?active=true
+    @PutMapping("/{id}/status")
+    public StudentProfile updateStatus(
+            @PathVariable Long id,
+            @RequestParam Boolean active) {
+        return service.updateStudentStatus(id, active);
+    }
+
+    // GET /api/students/lookup/{studentId}
+    @GetMapping("/lookup/{studentId}")
+    public StudentProfile lookup(@PathVariable String studentId) {
+        return service.findByStudentId(studentId).orElse(null);
     }
 }
