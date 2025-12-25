@@ -2,28 +2,37 @@ package com.example.demo.controller;
 
 import com.example.demo.model.HabitProfile;
 import com.example.demo.service.HabitProfileService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/habits")
 public class HabitProfileController {
-    
-    private final HabitProfileService habitService;
 
-    public HabitProfileController(HabitProfileService habitService) {
-        this.habitService = habitService;
-    }
+    private final HabitProfileService service;
 
-    @GetMapping("/{studentId}")
-    public ResponseEntity<HabitProfile> getByStudent(@PathVariable Long studentId) {
-        HabitProfile habit = habitService.getHabitByStudent(studentId);
-        return ResponseEntity.ok(habit);
+    public HabitProfileController(HabitProfileService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public ResponseEntity<HabitProfile> create(@RequestBody HabitProfile habit) {
-        HabitProfile created = habitService.createOrUpdateHabit(habit);
-        return ResponseEntity.ok(created);
+    public HabitProfile createOrUpdate(@RequestBody HabitProfile profile) {
+        return service.saveHabit(profile);
+    }
+
+    @GetMapping("/student/{studentId}")
+    public HabitProfile getByStudent(@PathVariable Long studentId) {
+        return service.getByStudentId(studentId);
+    }
+
+    @GetMapping("/{id}")
+    public HabitProfile getById(@PathVariable Long id) {
+        return service.getById(id);
+    }
+
+    @GetMapping
+    public List<HabitProfile> getAll() {
+        return service.getAllHabits();
     }
 }
