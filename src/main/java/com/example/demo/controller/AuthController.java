@@ -4,6 +4,7 @@ import com.example.demo.dto.AuthRequest;
 import com.example.demo.security.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.demo.repository.UserAccountRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +33,7 @@ public class AuthController {
                 request.getRole() != null ? request.getRole() : "USER", 
                 request.getEmail(), "1");
         
-        return 
-        return ResponseEntity.ok(Map.of("token", token));
+        return userrepository.save(request);
     }
 
     @PostMapping("/login")
