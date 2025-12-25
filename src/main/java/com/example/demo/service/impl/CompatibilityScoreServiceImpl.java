@@ -13,17 +13,19 @@ import java.util.Optional;
 
 @Service
 public class CompatibilityScoreServiceImpl implements CompatibilityScoreService {
-    
+
     private final CompatibilityScoreRecordRepository scoreRepo;
     private final HabitProfileRepository habitRepo;
 
-    public CompatibilityScoreServiceImpl(CompatibilityScoreRecordRepository scoreRepo, HabitProfileRepository habitRepo) {
+    public CompatibilityScoreServiceImpl(CompatibilityScoreRecordRepository scoreRepo,
+                                         HabitProfileRepository habitRepo) {
         this.scoreRepo = scoreRepo;
         this.habitRepo = habitRepo;
     }
 
     @Override
     public CompatibilityScoreRecord computeScore(Long studentAId, Long studentBId) {
+
         if (studentAId.equals(studentBId)) {
             throw new IllegalArgumentException("Cannot compute score for same student");
         }
@@ -34,10 +36,12 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
                 .orElseThrow(() -> new ResourceNotFoundException("Habit profile not found"));
 
         double score = calculateCompatibility(habitA, habitB);
-        
-        Optional<CompatibilityScoreRecord> existing = scoreRepo.findByStudentAIdAndStudentBId(studentAId, studentBId);
+
+        Optional<CompatibilityScoreRecord> existing =
+                scoreRepo.findByStudentAIdAndStudentBId(studentAId, studentBId);
+
         CompatibilityScoreRecord record;
-        
+
         if (existing.isPresent()) {
             record = existing.get();
             record.setScore(score);
@@ -47,37 +51,38 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
             record.setStudentBId(studentBId);
             record.setScore(score);
         }
-        
+
         return scoreRepo.save(record);
     }
 
     private double calculateCompatibility(HabitProfile a, HabitProfile b) {
+
         double score = 100.0;
-        
+
+        // Sleep schedule (exact match)
         if (a.getSleepSchedule() != null && b.getSleepSchedule() != null) {
             if (!a.getSleepSchedule().equals(b.getSleepSchedule())) {
                 score -= 10;
             }
         }
-        
-        if (a.getCleanlinessLevelEnum() != null && b.getCleanlinessLevelEnum() != null) {
-            if (!a.getCleanlinessLevelEnum().equals(b.getCleanlinessLevelEnum())) {
-                score -= 15;
-            }
+
+        // Cleanliness level (numeric distance)
+        if (a.getCleanlinessLevel() != null && b.getCleanlinessLevel() != null) {
+            score -= Math.abs(a.getCleanlinessLevel() - b.getCleanlinessLevel()) * 3;
         }
-        
-        if (a.getNoiseTolerance() != null && b.getNoiseTolerance() != null) {
-            if (!a.getNoiseTolerance().equals(b.getNoiseTolerance())) {
-                score -= 10;
-            }
+
+        // Noise preference (numeric distance)
+        if (a.getNoisePreference() != null && b.getNoisePreference() != null) {
+            score -= Math.abs(a.getNoisePreference() - b.getNoisePreference()) * 2;
         }
-        
-        if (a.getSocialPreferenceEnum() != null && b.getSocialPreferenceEnum() != null) {
-            if (!a.getSocialPreferenceEnum().equals(b.getSocialPreferenceEnum())) {
+
+        // Social preference (string match)
+        if (a.getSocialPreference() != null && b.getSocialPreference() != null) {
+            if (!a.getSocialPreference().equalsIgnoreCase(b.getSocialPreference())) {
                 score -= 5;
             }
         }
-        
+
         return Math.max(0, Math.min(100, score));
     }
 
