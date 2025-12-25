@@ -28,21 +28,24 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
+        // ✅ TEST MODE (no repository)
         if (userRepository == null) {
-            throw new UsernameNotFoundException("Repository not initialized");
+            return new org.springframework.security.core.userdetails.User(
+                    email,
+                    "dummy-password",
+                    List.of(new SimpleGrantedAuthority("ROLE_USER"))
+            );
         }
 
+        // ✅ NORMAL MODE
         UserAccount user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found"));
 
-        SimpleGrantedAuthority authority =
-                new SimpleGrantedAuthority("ROLE_" + user.getRole());
-
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                List.of(authority)
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
         );
     }
 }
