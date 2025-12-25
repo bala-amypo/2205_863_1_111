@@ -1,3 +1,4 @@
+
 package com.example.demo.dto;
 
 import jakarta.validation.constraints.Email;
@@ -29,4 +30,4 @@ public class AuthRequest {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
-}
+} 
