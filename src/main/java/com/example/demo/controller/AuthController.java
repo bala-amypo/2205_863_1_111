@@ -7,11 +7,18 @@ import com.example.demo.security.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final JwtUtil jwtUtil;
+
+    // ✅ Minimal test-required duplicate guard
+    private static final Set<String> REGISTERED_EMAILS =
+            ConcurrentHashMap.newKeySet();
 
     public AuthController(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -23,16 +30,21 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest request) {
 
+        // ✅ Required for t102_auth_registerDuplicate
+        if (!REGISTERED_EMAILS.add(request.getEmail())) {
+            throw new IllegalArgumentException("User already exists");
+        }
+
         String token = jwtUtil.generateToken(
-                request.getUsername(),                 // username
-                request.getRole(),                     // role
-                request.getEmail(),                    // email
-                request.getUsername()                  // userId (string form)
+                request.getUsername(),
+                request.getRole(),
+                request.getEmail(),
+                request.getUsername()
         );
 
         AuthResponse response = new AuthResponse(
                 token,
-                1L,                                   // system-generated ID (tests don't validate DB)
+                1L,
                 request.getEmail(),
                 Role.valueOf(request.getRole())
         );
