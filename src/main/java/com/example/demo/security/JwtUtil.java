@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -14,31 +13,29 @@ import java.util.Map;
 
 @Component
 public class JwtUtil {
-    
-    @Value("${jwt.secret:mySecretKey}")
-    private String secret;
-    
-    @Value("${jwt.expiration:86400000}")
-    private Long expiration;
+
+    // MUST be at least 32 characters for HS256
+    private static final String SECRET =
+            "mySuperSecureJwtSecretKeyForHS256Algorithm";
+
+    private static final long EXPIRATION = 86400000; // 1 day
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
     public String generateToken(String username, String role, String email, String userId) {
+
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-        claims.put("role", role);
-        claims.put("email", email);
-        return createToken(claims, username);
-    }
+        claims.put("role", role != null ? role : "USER");
+        claims.put("email", email != null ? email : "unknown@example.com");
 
-    private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -57,20 +54,15 @@ public class JwtUtil {
 
     public Boolean validateToken(String token, String email) {
         final String tokenEmail = getEmailFromToken(token);
-        return (tokenEmail.equals(email) && !isTokenExpired(token));
+        return tokenEmail.equals(email) && !isTokenExpired(token);
     }
 
     public String getEmailFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+        return getAllClaimsFromToken(token).get("email", String.class);
     }
 
     public Date getExpirationDateFromToken(String token) {
-        return getClaimFromToken(token, Claims::getExpiration);
-    }
-
-    public <T> T getClaimFromToken(String token, java.util.function.Function<Claims, T> claimsResolver) {
-        final Claims claims = getAllClaimsFromToken(token);
-        return claimsResolver.apply(claims);
+        return getAllClaimsFromToken(token).getExpiration();
     }
 
     private Claims getAllClaimsFromToken(String token) {
@@ -82,7 +74,6 @@ public class JwtUtil {
     }
 
     private Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(new Date());
+        return getExpirationDateFromToken(token).before(new Date());
     }
 }
