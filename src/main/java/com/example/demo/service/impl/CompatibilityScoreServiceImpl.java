@@ -46,6 +46,8 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
         record.setStudentAId(studentAId);
         record.setStudentBId(studentBId);
         record.setScore(score);
+        record.setComputedAt(java.time.LocalDateTime.now());
+
 
         return scoreRepo.save(record);
     }
