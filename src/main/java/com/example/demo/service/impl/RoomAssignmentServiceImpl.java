@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.RoomAssignmentRecord;
 import com.example.demo.model.StudentProfile;
@@ -12,24 +13,30 @@ import java.util.List;
 
 @Service
 public class RoomAssignmentServiceImpl implements RoomAssignmentService {
-    
+
     private final RoomAssignmentRecordRepository roomRepo;
     private final StudentProfileRepository studentRepo;
 
-    public RoomAssignmentServiceImpl(RoomAssignmentRecordRepository roomRepo, StudentProfileRepository studentRepo) {
+    public RoomAssignmentServiceImpl(RoomAssignmentRecordRepository roomRepo,
+                                     StudentProfileRepository studentRepo) {
         this.roomRepo = roomRepo;
         this.studentRepo = studentRepo;
     }
 
     @Override
     public RoomAssignmentRecord assignRoom(RoomAssignmentRecord assignment) {
-        StudentProfile studentA = studentRepo.findById(assignment.getStudentAId())
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-        StudentProfile studentB = studentRepo.findById(assignment.getStudentBId())
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
-        if (!studentA.getActive() || !studentB.getActive()) {
-            throw new IllegalArgumentException("both students must be active");
+        StudentProfile studentA = studentRepo.findById(assignment.getStudentAId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Student not found"));
+
+        StudentProfile studentB = studentRepo.findById(assignment.getStudentBId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Student not found"));
+
+        if (!Boolean.TRUE.equals(studentA.getActive())
+                || !Boolean.TRUE.equals(studentB.getActive())) {
+            throw new BadRequestException("Both students must be active");
         }
 
         assignment.setStatus(RoomAssignmentRecord.Status.ACTIVE);
@@ -38,10 +45,17 @@ public class RoomAssignmentServiceImpl implements RoomAssignmentService {
 
     @Override
     public RoomAssignmentRecord updateStatus(Long id, String status) {
+
         RoomAssignmentRecord assignment = roomRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
-        
-        assignment.setStatus(RoomAssignmentRecord.Status.valueOf(status));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Assignment not found"));
+
+        try {
+            assignment.setStatus(RoomAssignmentRecord.Status.valueOf(status));
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid assignment status");
+        }
+
         return roomRepo.save(assignment);
     }
 
@@ -56,8 +70,9 @@ public class RoomAssignmentServiceImpl implements RoomAssignmentService {
     }
 
     @Override
-    public RoomAssignmentRecord getAssignmentById(Long id) {
+    public RoomAssignmentRecord getById(Long id) {
         return roomRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Assignment not found"));
     }
 }
