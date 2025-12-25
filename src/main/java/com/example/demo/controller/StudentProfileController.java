@@ -16,25 +16,21 @@ public class StudentProfileController {
         this.service = service;
     }
 
-    // POST /api/students
     @PostMapping
-    public StudentProfile createStudent(@RequestBody StudentProfile student) {
+    public StudentProfile create(@RequestBody StudentProfile student) {
         return service.createStudent(student);
     }
 
-    // GET /api/students/{id}
     @GetMapping("/{id}")
     public StudentProfile getById(@PathVariable Long id) {
         return service.getStudentById(id);
     }
 
-    // GET /api/students
     @GetMapping
     public List<StudentProfile> getAll() {
         return service.getAllStudents();
     }
 
-    // PUT /api/students/{id}/status?active=true
     @PutMapping("/{id}/status")
     public StudentProfile updateStatus(
             @PathVariable Long id,
@@ -42,7 +38,6 @@ public class StudentProfileController {
         return service.updateStudentStatus(id, active);
     }
 
-    // GET /api/students/lookup/{studentId}
     @GetMapping("/lookup/{studentId}")
     public StudentProfile lookup(@PathVariable String studentId) {
         return service.findByStudentId(studentId).orElse(null);
