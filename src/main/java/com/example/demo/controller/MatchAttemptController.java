@@ -36,7 +36,7 @@ public class MatchAttemptController {
 
     @GetMapping("/{id}")
     public MatchAttemptRecord getById(@PathVariable Long id) {
-        return service.getById(id);
+        return service.getMatchAttemptById(id);
     }
 
     @GetMapping

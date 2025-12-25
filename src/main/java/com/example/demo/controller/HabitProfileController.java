@@ -1,45 +1,38 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.StudentProfile;
-import com.example.demo.service.StudentProfileService;
+import com.example.demo.model.HabitProfile;
+import com.example.demo.service.HabitProfileService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/students")
-public class StudentProfileController {
+@RequestMapping("/api/habits")
+public class HabitProfileController {
 
-    private final StudentProfileService service;
+    private final HabitProfileService service;
 
-    public StudentProfileController(StudentProfileService service) {
+    public HabitProfileController(HabitProfileService service) {
         this.service = service;
     }
 
     @PostMapping
-    public StudentProfile create(@RequestBody StudentProfile student) {
-        return service.createStudent(student);
+    public HabitProfile createOrUpdate(@RequestBody HabitProfile habit) {
+        return service.createOrUpdateHabit(habit);
+    }
+
+    @GetMapping("/student/{studentId}")
+    public HabitProfile getByStudent(@PathVariable Long studentId) {
+        return service.getHabitByStudent(studentId);
     }
 
     @GetMapping("/{id}")
-    public StudentProfile getById(@PathVariable Long id) {
-        return service.getStudentById(id);
+    public HabitProfile getById(@PathVariable Long id) {
+        return service.getHabitById(id).orElse(null);
     }
 
     @GetMapping
-    public List<StudentProfile> getAll() {
-        return service.getAllStudents();
-    }
-
-    @PutMapping("/{id}/status")
-    public StudentProfile updateStatus(
-            @PathVariable Long id,
-            @RequestParam Boolean active) {
-        return service.updateStudentStatus(id, active);
-    }
-
-    @GetMapping("/lookup/{studentId}")
-    public StudentProfile lookup(@PathVariable String studentId) {
-        return service.findByStudentId(studentId).orElse(null);
+    public List<HabitProfile> getAll() {
+        return service.getAllHabitProfiles();
     }
 }
