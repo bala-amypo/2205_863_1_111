@@ -4,7 +4,7 @@ import com.example.demo.dto.AuthRequest;
 import com.example.demo.model.UserAccount;
 import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtUtil;
-import jakarta.validation.Valid;
+import com.example.demo.security.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,55 +15,48 @@ import java.util.Map;
 public class AuthController {
 
     private final JwtUtil jwtUtil;
-    private final UserAccountRepository userRepository;
+    private final UserAccountRepository userrepository;
 
-    public AuthController(JwtUtil jwtUtil, UserAccountRepository userRepository) {
+    public AuthController(JwtUtil jwtUtil, UserAccountRepository userrepository) {
         this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
+        this.userrepository = userrepository;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody AuthRequest request) {
+    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
 
-        // 1️⃣ Check if user already exists
-        if (userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.badRequest().body("Username already exists");
+        if (userrepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity.badRequest().body("User already exists");
         }
 
-        // 2️⃣ Convert DTO → Entity
         UserAccount user = new UserAccount();
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword()); // BCrypt later
         user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
         user.setRole(
-                request.getRole() != null ? request.getRole() : "USER"
+                request.getRole() != null
+                        ? Role.valueOf(request.getRole())
+                        : Role.USER
         );
 
-        // 3️⃣ Save user
-        UserAccount savedUser = userRepository.save(user);
+        UserAccount savedUser = userrepository.save(user);
 
-        // 4️⃣ Generate JWT
         String token = jwtUtil.generateToken(
-                savedUser.getUsername(),
-                savedUser.getRole(),
+                savedUser.getEmail(),
+                savedUser.getRole().name(),
                 savedUser.getEmail(),
                 savedUser.getId().toString()
         );
 
-        // 5️⃣ Return response
         return ResponseEntity.ok(
-                Map.of(
-                        "message", "User registered successfully",
-                        "token", token
-                )
+                Map.of("token", token)
         );
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
 
-        UserAccount user = userRepository
-                .findByUsername(request.getUsername())
+        UserAccount user = userrepository
+                .findByEmail(request.getEmail())
                 .orElse(null);
 
         if (user == null || !user.getPassword().equals(request.getPassword())) {
@@ -71,8 +64,8 @@ public class AuthController {
         }
 
         String token = jwtUtil.generateToken(
-                user.getUsername(),
-                user.getRole(),
+                user.getEmail(),
+                user.getRole().name(),
                 user.getEmail(),
                 user.getId().toString()
         );
