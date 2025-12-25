@@ -14,32 +14,35 @@ import java.util.List;
 
 @Service
 public class MatchService {
-    
+
     private final MatchResultRepository matchResultRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final HabitProfileRepository habitProfileRepository;
 
     public MatchService(MatchResultRepository matchResultRepository,
-                       StudentProfileRepository studentProfileRepository,
-                       HabitProfileRepository habitProfileRepository) {
+                        StudentProfileRepository studentProfileRepository,
+                        HabitProfileRepository habitProfileRepository) {
         this.matchResultRepository = matchResultRepository;
         this.studentProfileRepository = studentProfileRepository;
         this.habitProfileRepository = habitProfileRepository;
     }
 
     public MatchResult computeMatch(Long studentAId, Long studentBId) {
+
         StudentProfile studentA = studentProfileRepository.findById(studentAId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
         StudentProfile studentB = studentProfileRepository.findById(studentBId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         HabitProfile habitA = habitProfileRepository.findByStudentId(studentAId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
+
         HabitProfile habitB = habitProfileRepository.findByStudentId(studentBId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
 
         double score = calculateCompatibilityScore(habitA, habitB);
-        
+
         if (score < 0 || score > 100) {
             throw new IllegalArgumentException("Score must be between 0-100");
         }
@@ -51,7 +54,8 @@ public class MatchService {
     }
 
     public List<MatchResult> getMatchesFor(Long studentId) {
-        return matchResultRepository.findByStudentAIdOrStudentBIdOrderByScoreDesc(studentId, studentId);
+        return matchResultRepository
+                .findByStudentAIdOrStudentBIdOrderByScoreDesc(studentId, studentId);
     }
 
     public MatchResult getById(Long id) {
@@ -60,46 +64,55 @@ public class MatchService {
     }
 
     private double calculateCompatibilityScore(HabitProfile habitA, HabitProfile habitB) {
+
         double score = 100.0;
-        
+
         // Sleep time compatibility
         if (habitA.getSleepTime() != null && habitB.getSleepTime() != null) {
-            score -= calculateTimeDifferencePenalty(habitA.getSleepTime(), habitB.getSleepTime()) * 0.2;
+            score -= calculateTimeDifferencePenalty(
+                    habitA.getSleepTime(), habitB.getSleepTime()) * 0.2;
         }
-        
+
         // Wake time compatibility
         if (habitA.getWakeTime() != null && habitB.getWakeTime() != null) {
-            score -= calculateTimeDifferencePenalty(habitA.getWakeTime(), habitB.getWakeTime()) * 0.2;
+            score -= calculateTimeDifferencePenalty(
+                    habitA.getWakeTime(), habitB.getWakeTime()) * 0.2;
         }
-        
+
         // Smoking compatibility
-        if (habitA.getSmoking() != null && habitB.getSmoking() != null && 
-            !habitA.getSmoking().equals(habitB.getSmoking())) {
+        if (habitA.getSmoking() != null && habitB.getSmoking() != null &&
+                !habitA.getSmoking().equals(habitB.getSmoking())) {
             score -= 15;
         }
-        
+
         // Drinking compatibility
-        if (habitA.getDrinking() != null && habitB.getDrinking() != null && 
-            !habitA.getDrinking().equals(habitB.getDrinking())) {
+        if (habitA.getDrinking() != null && habitB.getDrinking() != null &&
+                !habitA.getDrinking().equals(habitB.getDrinking())) {
             score -= 10;
         }
-        
-        // Cleanliness compatibility
+
+        // Cleanliness compatibility (ENUM → ordinal)
         if (habitA.getCleanlinessLevel() != null && habitB.getCleanlinessLevel() != null) {
-            score -= Math.abs(habitA.getCleanlinessLevel() - habitB.getCleanlinessLevel()) * 5;
+            score -= Math.abs(
+                    habitA.getCleanlinessLevel().ordinal()
+                            - habitB.getCleanlinessLevel().ordinal()
+            ) * 5;
         }
-        
-        // Noise preference compatibility
-        if (habitA.getNoisePreference() != null && habitB.getNoisePreference() != null) {
-            score -= Math.abs(habitA.getNoisePreference() - habitB.getNoisePreference()) * 5;
+
+        // Noise tolerance compatibility (ENUM → ordinal)
+        if (habitA.getNoiseTolerance() != null && habitB.getNoiseTolerance() != null) {
+            score -= Math.abs(
+                    habitA.getNoiseTolerance().ordinal()
+                            - habitB.getNoiseTolerance().ordinal()
+            ) * 5;
         }
-        
+
         return Math.max(0, Math.min(100, score));
     }
 
     private double calculateTimeDifferencePenalty(LocalTime time1, LocalTime time2) {
         int diff = Math.abs(time1.getHour() - time2.getHour());
-        return Math.min(diff, 24 - diff) * 2; // Max penalty of 24 hours difference
+        return Math.min(diff, 24 - diff) * 2;
     }
 
     private String generateReasonSummary(HabitProfile habitA, HabitProfile habitB, double score) {

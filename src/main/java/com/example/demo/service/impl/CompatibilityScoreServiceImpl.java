@@ -17,8 +17,9 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
     private final CompatibilityScoreRecordRepository scoreRepo;
     private final HabitProfileRepository habitRepo;
 
-    public CompatibilityScoreServiceImpl(CompatibilityScoreRecordRepository scoreRepo,
-                                         HabitProfileRepository habitRepo) {
+    public CompatibilityScoreServiceImpl(
+            CompatibilityScoreRecordRepository scoreRepo,
+            HabitProfileRepository habitRepo) {
         this.scoreRepo = scoreRepo;
         this.habitRepo = habitRepo;
     }
@@ -30,27 +31,21 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
             throw new IllegalArgumentException("Cannot compute score for same student");
         }
 
-        HabitProfile habitA = habitRepo.findByStudentId(studentAId)
-                .orElseThrow(() -> new ResourceNotFoundException("Habit profile not found"));
-        HabitProfile habitB = habitRepo.findByStudentId(studentBId)
+        HabitProfile a = habitRepo.findByStudentId(studentAId)
                 .orElseThrow(() -> new ResourceNotFoundException("Habit profile not found"));
 
-        double score = calculateCompatibility(habitA, habitB);
+        HabitProfile b = habitRepo.findByStudentId(studentBId)
+                .orElseThrow(() -> new ResourceNotFoundException("Habit profile not found"));
+
+        double score = calculateCompatibility(a, b);
 
         Optional<CompatibilityScoreRecord> existing =
                 scoreRepo.findByStudentAIdAndStudentBId(studentAId, studentBId);
 
-        CompatibilityScoreRecord record;
-
-        if (existing.isPresent()) {
-            record = existing.get();
-            record.setScore(score);
-        } else {
-            record = new CompatibilityScoreRecord();
-            record.setStudentAId(studentAId);
-            record.setStudentBId(studentBId);
-            record.setScore(score);
-        }
+        CompatibilityScoreRecord record = existing.orElseGet(CompatibilityScoreRecord::new);
+        record.setStudentAId(studentAId);
+        record.setStudentBId(studentBId);
+        record.setScore(score);
 
         return scoreRepo.save(record);
     }
@@ -59,28 +54,32 @@ public class CompatibilityScoreServiceImpl implements CompatibilityScoreService 
 
         double score = 100.0;
 
-        // Sleep schedule (exact match)
-        if (a.getSleepSchedule() != null && b.getSleepSchedule() != null) {
-            if (!a.getSleepSchedule().equals(b.getSleepSchedule())) {
-                score -= 10;
-            }
+        // Sleep schedule
+        if (a.getSleepSchedule() != null && b.getSleepSchedule() != null &&
+                a.getSleepSchedule() != b.getSleepSchedule()) {
+            score -= 10;
         }
 
-        // Cleanliness level (numeric distance)
+        // Cleanliness
         if (a.getCleanlinessLevel() != null && b.getCleanlinessLevel() != null) {
-            score -= Math.abs(a.getCleanlinessLevel() - b.getCleanlinessLevel()) * 3;
+            score -= Math.abs(
+                    a.getCleanlinessLevel().ordinal()
+                            - b.getCleanlinessLevel().ordinal()
+            ) * 5;
         }
 
-        // Noise preference (numeric distance)
-        if (a.getNoisePreference() != null && b.getNoisePreference() != null) {
-            score -= Math.abs(a.getNoisePreference() - b.getNoisePreference()) * 2;
+        // Noise tolerance
+        if (a.getNoiseTolerance() != null && b.getNoiseTolerance() != null) {
+            score -= Math.abs(
+                    a.getNoiseTolerance().ordinal()
+                            - b.getNoiseTolerance().ordinal()
+            ) * 3;
         }
 
-        // Social preference (string match)
-        if (a.getSocialPreference() != null && b.getSocialPreference() != null) {
-            if (!a.getSocialPreference().equalsIgnoreCase(b.getSocialPreference())) {
-                score -= 5;
-            }
+        // Social preference
+        if (a.getSocialPreference() != null && b.getSocialPreference() != null &&
+                a.getSocialPreference() != b.getSocialPreference()) {
+            score -= 5;
         }
 
         return Math.max(0, Math.min(100, score));

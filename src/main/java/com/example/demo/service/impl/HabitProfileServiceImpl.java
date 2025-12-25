@@ -33,7 +33,7 @@ public class HabitProfileServiceImpl implements HabitProfileService {
             existingHabit.setStudyHoursPerDay(habit.getStudyHoursPerDay());
             existingHabit.setSleepSchedule(habit.getSleepSchedule());
             existingHabit.setCleanlinessLevel(habit.getCleanlinessLevel());
-            existingHabit.setNoisePreference(habit.getNoisePreference());
+            existingHabit.setNoiseTolerance(habit.getNoiseTolerance());
             existingHabit.setSocialPreference(habit.getSocialPreference());
             existingHabit.setStudyStyle(habit.getStudyStyle());
             existingHabit.setVisitorsFrequency(habit.getVisitorsFrequency());
