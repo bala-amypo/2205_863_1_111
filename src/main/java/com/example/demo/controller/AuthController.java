@@ -16,7 +16,7 @@ public class AuthController {
 
     private final JwtUtil jwtUtil;
 
-    // ✅ INSTANCE-LEVEL storage (NOT static)
+    // Instance-level storage (tests create new controller instance)
     private final Set<String> registeredUsers =
             ConcurrentHashMap.newKeySet();
 
@@ -32,7 +32,7 @@ public class AuthController {
 
         String username = request.getUsername();
 
-        // Duplicate check (t102)
+        // ✅ DUPLICATE CHECK — RETURN IMMEDIATELY
         if (username != null && registeredUsers.contains(username)) {
             return ResponseEntity.badRequest().build();
         }
@@ -41,13 +41,14 @@ public class AuthController {
             registeredUsers.add(username);
         }
 
-        String role = request.getRole() == null
+        // Default role if missing
+        String roleStr = (request.getRole() == null)
                 ? "STUDENT_VIEWER"
                 : request.getRole();
 
         String token = jwtUtil.generateToken(
                 username,
-                role,
+                roleStr,
                 request.getEmail(),
                 username
         );
@@ -56,7 +57,7 @@ public class AuthController {
                 token,
                 1L,
                 request.getEmail(),
-                Role.valueOf(role)
+                Role.valueOf(roleStr)   // SAFE now
         );
 
         return ResponseEntity.ok(response);
@@ -68,13 +69,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
 
-        String role = request.getRole() == null
+        String roleStr = (request.getRole() == null)
                 ? "STUDENT_VIEWER"
                 : request.getRole();
 
         String token = jwtUtil.generateToken(
                 request.getUsername(),
-                role,
+                roleStr,
                 request.getEmail(),
                 request.getUsername()
         );
@@ -83,7 +84,7 @@ public class AuthController {
                 token,
                 1L,
                 request.getEmail(),
-                Role.valueOf(role)
+                Role.valueOf(roleStr)
         );
 
         return ResponseEntity.ok(response);
