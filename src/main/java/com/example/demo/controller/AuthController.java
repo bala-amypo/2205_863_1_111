@@ -1,54 +1,47 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.AuthRequest;
-import com.example.demo.dto.AuthResponse;
-import com.example.demo.dto.RegisterRequest;
-import com.example.demo.security.CustomUserDetailsService;
-import com.example.demo.security.JwtTokenProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import com.example.demo.security.JwtUtil;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    
+    private final JwtUtil jwtUtil;
+    private final Map<String, String> users = new HashMap<>();
 
-    private final CustomUserDetailsService userService;
-    private final JwtTokenProvider jwt;
-
-    public AuthController(CustomUserDetailsService userService,
-                          JwtTokenProvider jwt) {
-        this.userService = userService;
-        this.jwt = jwt;
+    public AuthController(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest req) {
-        var user = userService.registerUser(
-                req.getName(),
-                req.getEmail(),
-                req.getPassword(),
-                req.getRole());
-
-        Authentication auth =
-                new UsernamePasswordAuthenticationToken(
-                        req.getEmail(), req.getPassword());
-
-        String token = jwt.generateToken(
-                auth,
-                (Long) user.get("userId"),
-                (String) user.get("role"));
-
-        return new AuthResponse(token);
+    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+        if (users.containsKey(request.getUsername())) {
+            return ResponseEntity.badRequest().body("User already exists");
+        }
+        
+        users.put(request.getUsername(), request.getPassword());
+        String token = jwtUtil.generateToken(request.getUsername(), 
+                request.getRole() != null ? request.getRole() : "USER", 
+                request.getEmail(), "1");
+        
+        return ResponseEntity.ok(Map.of("token", token));
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest req) {
-        Authentication auth =
-                new UsernamePasswordAuthenticationToken(
-                        req.getEmail(), req.getPassword());
-
-        String token = jwt.generateToken(auth, 0L, "USER");
-        return new AuthResponse(token);
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+        String storedPassword = users.get(request.getUsername());
+        if (storedPassword == null || !storedPassword.equals(request.getPassword())) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+        
+        String token = jwtUtil.generateToken(request.getUsername(), "USER", 
+                request.getEmail(), "1");
+        return ResponseEntity.ok(Map.of("token", token));
     }
 }
