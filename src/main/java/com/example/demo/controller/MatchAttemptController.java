@@ -10,27 +10,40 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/match-attempts")
 public class MatchAttemptController {
+    
+    private final MatchAttemptService attemptService;
 
-    private final MatchAttemptService service;
-
-    public MatchAttemptController(MatchAttemptService service) {
-        this.service = service;
+    public MatchAttemptController(MatchAttemptService attemptService) {
+        this.attemptService = attemptService;
     }
 
     @PostMapping
-    public ResponseEntity<MatchAttemptRecord> log(@RequestBody MatchAttemptRecord record) {
-        return ResponseEntity.ok(service.logMatchAttempt(record));
+    public ResponseEntity<MatchAttemptRecord> log(@RequestBody MatchAttemptRecord attempt) {
+        MatchAttemptRecord logged = attemptService.logMatchAttempt(attempt);
+        return ResponseEntity.ok(logged);
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<MatchAttemptRecord> updateStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
-        return ResponseEntity.ok(service.updateAttemptStatus(id, status));
+    public ResponseEntity<MatchAttemptRecord> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        MatchAttemptRecord updated = attemptService.updateAttemptStatus(id, status);
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<MatchAttemptRecord>> getByStudent(@PathVariable Long studentId) {
+        List<MatchAttemptRecord> attempts = attemptService.getAttemptsByStudent(studentId);
+        return ResponseEntity.ok(attempts);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MatchAttemptRecord> getById(@PathVariable Long id) {
+        MatchAttemptRecord attempt = attemptService.getAttemptById(id);
+        return ResponseEntity.ok(attempt);
     }
 
     @GetMapping
     public ResponseEntity<List<MatchAttemptRecord>> getAll() {
-        return ResponseEntity.ok(service.getAllMatchAttempts());
+        List<MatchAttemptRecord> attempts = attemptService.getAllMatchAttempts();
+        return ResponseEntity.ok(attempts);
     }
 }

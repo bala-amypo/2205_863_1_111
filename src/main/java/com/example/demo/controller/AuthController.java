@@ -1,67 +1,47 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.AuthRequest;
-import com.example.demo.dto.AuthResponse;
-import com.example.demo.security.CustomUserDetailsService;
 import com.example.demo.security.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
-    private final CustomUserDetailsService userService;
+    
     private final JwtUtil jwtUtil;
+    private final Map<String, String> users = new HashMap<>();
 
-    public AuthController(CustomUserDetailsService userService, JwtUtil jwtUtil) {
-        this.userService = userService;
+    public AuthController(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
-    // THIS METHOD IS REQUIRED BY TESTS
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest request) {
-
-        var user = userService.registerUser(
-                request.getName(),
-                request.getEmail(),
-                request.getPassword(),
-                request.getRole()
-        );
-
-        String token = jwtUtil.generateToken(
-                request.getEmail(),
-                (Long) user.get("userId"),
-                (String) user.get("role")
-        );
-
-        AuthResponse response = new AuthResponse(
-                token,
-                (Long) user.get("userId"),
-                request.getEmail(),
-                request.getRole()
-        );
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+        if (users.containsKey(request.getUsername())) {
+            return ResponseEntity.badRequest().body("User already exists");
+        }
+        
+        users.put(request.getUsername(), request.getPassword());
+        String token = jwtUtil.generateToken(request.getUsername(), 
+                request.getRole() != null ? request.getRole() : "USER", 
+                request.getEmail(), "1");
+        
+        return ResponseEntity.ok(Map.of("token", token));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-
-        String token = jwtUtil.generateToken(
-                request.getEmail(),
-                0L,
-                "USER"
-        );
-
-        AuthResponse response = new AuthResponse(
-                token,
-                0L,
-                request.getEmail(),
-                null
-        );
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+        String storedPassword = users.get(request.getUsername());
+        if (storedPassword == null || !storedPassword.equals(request.getPassword())) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+        
+        String token = jwtUtil.generateToken(request.getUsername(), "USER", 
+                request.getEmail(), "1");
+        return ResponseEntity.ok(Map.of("token", token));
     }
 }

@@ -10,25 +10,35 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/habits")
 public class HabitProfileController {
+    
+    private final HabitProfileService habitService;
 
-    private final HabitProfileService service;
-
-    public HabitProfileController(HabitProfileService service) {
-        this.service = service;
+    public HabitProfileController(HabitProfileService habitService) {
+        this.habitService = habitService;
     }
 
     @PostMapping
-    public ResponseEntity<HabitProfile> createOrUpdate(@RequestBody HabitProfile habit) {
-        return ResponseEntity.ok(service.createOrUpdateHabit(habit));
+    public ResponseEntity<HabitProfile> create(@RequestBody HabitProfile habit) {
+        HabitProfile created = habitService.createOrUpdateHabit(habit);
+        return ResponseEntity.ok(created);
+    }
+
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<HabitProfile> getByStudent(@PathVariable Long studentId) {
+        HabitProfile habit = habitService.getHabitByStudent(studentId);
+        return ResponseEntity.ok(habit);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<HabitProfile> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getHabitById(id).orElse(null));
+        return habitService.getHabitById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
     public ResponseEntity<List<HabitProfile>> getAll() {
-        return ResponseEntity.ok(service.getAllHabitProfiles());
+        List<HabitProfile> habits = habitService.getAllHabitProfiles();
+        return ResponseEntity.ok(habits);
     }
 }
