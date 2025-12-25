@@ -2,66 +2,56 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.AuthResponse;
-import com.example.demo.security.JwtUtil;
-import com.example.demo.security.Role;
-import org.springframework.http.ResponseEntity;
+import com.example.demo.dto.RegisterRequest;
+import com.example.demo.security.CustomUserDetailsService;
+import com.example.demo.security.JwtTokenProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final JwtUtil jwtUtil;
+    private final CustomUserDetailsService userService;
+    private final JwtTokenProvider jwt;
 
-    // constructor required for Spring & tests
-    public AuthController(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
+    public AuthController(CustomUserDetailsService userService,
+                          JwtTokenProvider jwt) {
+        this.userService = userService;
+        this.jwt = jwt;
     }
 
-    /**
-     * Registration endpoint
-     * (Dummy implementation – enough for tests & Swagger)
-     */
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest request) {
+    public AuthResponse register(@RequestBody RegisterRequest req) {
 
-        String token = jwtUtil.generateToken(
-                request.getEmail(),
-                "1",
-                "USER",
-                "REGISTER"
+        var user = userService.registerUser(
+                req.getName(),
+                req.getEmail(),
+                req.getPassword(),
+                req.getRole()
         );
 
-        AuthResponse response = new AuthResponse(
-                token,
-                1L,
-                request.getEmail(),
-                Role.USER
-        );
+        Authentication auth =
+                new UsernamePasswordAuthenticationToken(
+                        req.getEmail(), req.getPassword());
 
-        return ResponseEntity.ok(response);
+        String token = jwt.generateToken(
+                auth,
+                (Long) user.get("userId"),
+                (String) user.get("role"));
+
+        return new AuthResponse(token);
     }
 
-    /**
-     * Login endpoint
-     */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public AuthResponse login(@RequestBody AuthRequest req) {
 
-        String token = jwtUtil.generateToken(
-                request.getEmail(),
-                "1",
-                "USER",
-                "LOGIN"
-        );
+        Authentication auth =
+                new UsernamePasswordAuthenticationToken(
+                        req.getEmail(), req.getPassword());
 
-        AuthResponse response = new AuthResponse(
-                token,
-                1L,
-                request.getEmail(),
-                Role.USER
-        );
-
-        return ResponseEntity.ok(response);
+        String token = jwt.generateToken(auth, 0L, "USER");
+        return new AuthResponse(token);
     }
 }
