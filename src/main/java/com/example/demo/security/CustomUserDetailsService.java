@@ -1,36 +1,39 @@
 package com.example.demo.security;
 
+import com.example.demo.model.UserAccount;
+import com.example.demo.repository.UserAccountRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-    
-    private final Map<String, UserDetails> users = new HashMap<>();
 
-    public CustomUserDetailsService() {
-        // Seed admin user
-        users.put("admin", new User(
-                "admin",
-                "password",
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
-        ));
+    private final UserAccountRepository userRepository;
+
+    public CustomUserDetailsService(UserAccountRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails user = users.get(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        return user;
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
+
+        UserAccount user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found"));
+
+        SimpleGrantedAuthority authority =
+                new SimpleGrantedAuthority("ROLE_" + user.getRole());
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                List.of(authority)
+        );
     }
 }
