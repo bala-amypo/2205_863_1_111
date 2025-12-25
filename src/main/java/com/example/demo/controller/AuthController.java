@@ -15,6 +15,8 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final Map<String, String> users = new HashMap<>();
 
+
+    private final UserAccountRepository userrepository;
     public AuthController(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
@@ -30,6 +32,7 @@ public class AuthController {
                 request.getRole() != null ? request.getRole() : "USER", 
                 request.getEmail(), "1");
         
+        return 
         return ResponseEntity.ok(Map.of("token", token));
     }
 
