@@ -20,8 +20,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil,
-                                   UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(
+            JwtUtil jwtUtil,
+            UserDetailsService userDetailsService
+    ) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
@@ -33,23 +35,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
+        // ✅ No token → let SecurityConfig handle it
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
-        String username = jwtUtil.getUsernameFromToken(token);
 
-        if (username != null &&
-            SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            // ✅ FIRST validate token (throws exception if invalid)
+            jwtUtil.validate(token);
 
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(username);
+            String username = jwtUtil.getUsernameFromToken(token);
 
-             if(jwtUtil.validateToken(token, userDetails.getUsername())){
+            if (username != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(username);
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -59,13 +65,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         );
 
                 authentication.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
                 );
 
-                // ✅ THIS LINE MAKES AUTH WORK
+                // ✅ Proper authentication
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
             }
+
+        } catch (Exception ex) {
+            // ❌ Invalid token → block request HARD
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
 
         filterChain.doFilter(request, response);
