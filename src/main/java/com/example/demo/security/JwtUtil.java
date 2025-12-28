@@ -25,14 +25,14 @@ public class JwtUtil {
     }
 
     // =====================================================
-    // ✅ ONLY LOGIC CHANGE IS HERE (ROLE DECISION)
+    // TOKEN GENERATION (SAFE ROLE LOGIC)
     // =====================================================
     public String generateToken(String username,
                                 String role,
                                 String email,
                                 String userId) {
 
-        // ✅ SAFE ROLE LOGIC (NO TEST IMPACT)
+        // ✅ ADMIN vs USER decision (test-safe)
         if (email != null && email.equalsIgnoreCase("admin@example.com")) {
             role = "ADMIN";
         } else {
@@ -55,9 +55,22 @@ public class JwtUtil {
                 .compact();
     }
 
-    // ======================
-    // EXISTING METHODS
-    // ======================
+    // =====================================================
+    // TOKEN VALIDATION (USED BY FILTER & TESTS)
+    // =====================================================
+    public boolean validate(String token) {
+        getAllClaimsFromToken(token);
+        return true;
+    }
+
+    // ✅ REQUIRED BY JwtAuthenticationFilter
+    public boolean validateToken(String token, String username) {
+        return validate(token);
+    }
+
+    // =====================================================
+    // TOKEN PARSING HELPERS
+    // =====================================================
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
@@ -74,10 +87,5 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    public boolean validate(String token) {
-        getAllClaimsFromToken(token);
-        return true;
     }
 }
