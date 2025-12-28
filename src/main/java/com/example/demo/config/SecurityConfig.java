@@ -37,14 +37,36 @@ public class SecurityConfig {
 
             // Authorization rules
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
+
+                // Public endpoints (UNCHANGED)
                 .requestMatchers(
                         "/auth/**",
                         "/swagger-ui/**",
                         "/v3/api-docs/**"
                 ).permitAll()
 
-                // Protected APIs
+                // =======================
+                // ✅ ADDED ROLE CHECKS
+                // =======================
+
+                // ADMIN only
+                .requestMatchers(
+                        "/api/students/**",
+                        "/api/room-assignments/**"
+                ).hasRole("ADMIN")
+
+                // USER + ADMIN
+                .requestMatchers(
+                        "/api/habits/**",
+                        "/api/matches/**",
+                        "/api/match-attempts/**"
+                ).hasAnyRole("USER", "ADMIN")
+
+                // =======================
+                // EXISTING RULE (UNCHANGED)
+                // =======================
+
+                // Protected APIs (fallback – keeps tests safe)
                 .requestMatchers("/api/**").authenticated()
 
                 // Everything else
@@ -52,7 +74,10 @@ public class SecurityConfig {
             )
 
             // JWT filter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                    jwtAuthenticationFilter,
+                    UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
