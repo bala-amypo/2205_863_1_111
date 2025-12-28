@@ -27,44 +27,45 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            // Disable CSRF (JWT is stateless)
             .csrf(csrf -> csrf.disable())
-
-            // Stateless session
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-
-            // Authorization rules
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
+
+                // Public
                 .requestMatchers(
                         "/auth/**",
                         "/swagger-ui/**",
                         "/v3/api-docs/**"
                 ).permitAll()
 
-                // Protected APIs
-                .requestMatchers("/api/**").authenticated()
+                // ADMIN ONLY
+                .requestMatchers(
+                        "/api/students/**",
+                        "/api/room-assignments/**"
+                ).hasAuthority("ROLE_ADMIN")
 
-                // Everything else
+                // USER + ADMIN
+                .requestMatchers("/api/**")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
                 .anyRequest().denyAll()
             )
-
-            // JWT filter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                    jwtAuthenticationFilter,
+                    UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
 
-    // Authentication manager
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // Password encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
