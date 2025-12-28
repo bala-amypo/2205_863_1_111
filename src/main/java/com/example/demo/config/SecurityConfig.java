@@ -37,6 +37,7 @@ public class SecurityConfig {
 
             // Authorization rules
             .authorizeHttpRequests(auth -> auth
+
                 // Public endpoints
                 .requestMatchers(
                         "/auth/**",
@@ -44,7 +45,21 @@ public class SecurityConfig {
                         "/v3/api-docs/**"
                 ).permitAll()
 
-                // Protected APIs
+                // =======================
+                // SECURITY DEMO (EXAM)
+                // =======================
+
+                // ADMIN only demo endpoint
+                .requestMatchers("/api/security-demo/admin").hasRole("ADMIN")
+
+                // USER + ADMIN demo endpoint
+                .requestMatchers("/api/security-demo/user").hasAnyRole("USER", "ADMIN")
+
+                // =======================
+                // EXISTING RULE (UNCHANGED)
+                // =======================
+
+                // Protected APIs (fallback)
                 .requestMatchers("/api/**").authenticated()
 
                 // Everything else
@@ -52,7 +67,10 @@ public class SecurityConfig {
             )
 
             // JWT filter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                    jwtAuthenticationFilter,
+                    UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
@@ -69,15 +87,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    // =======================
-// SECURITY DEMO (EXAM)
-// =======================
-
-// ADMIN only demo endpoint
-.requestMatchers("/api/security-demo/admin").hasRole("ADMIN")
-
-// USER + ADMIN demo endpoint
-.requestMatchers("/api/security-demo/user").hasAnyRole("USER", "ADMIN")
-
 }
