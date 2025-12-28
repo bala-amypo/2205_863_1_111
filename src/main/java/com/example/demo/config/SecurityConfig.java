@@ -35,8 +35,9 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            // Authorization rules
+            // Authorization rules (ORDER MATTERS)
             .authorizeHttpRequests(auth -> auth
+
                 // Public endpoints
                 .requestMatchers(
                         "/auth/**",
@@ -44,15 +45,25 @@ public class SecurityConfig {
                         "/v3/api-docs/**"
                 ).permitAll()
 
-                // Protected APIs
-                .requestMatchers("/api/**").authenticated()
+                // ✅ ADMIN ONLY (MUST COME BEFORE /api/**)
+                .requestMatchers(
+                        "/api/students/**",
+                        "/api/room-assignments/**"
+                ).hasAuthority("ROLE_ADMIN")
+
+                // ✅ USER + ADMIN
+                .requestMatchers("/api/**")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
                 // Everything else
                 .anyRequest().denyAll()
             )
 
             // JWT filter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                    jwtAuthenticationFilter,
+                    UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
