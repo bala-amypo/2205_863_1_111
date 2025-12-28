@@ -47,4 +47,16 @@ public class StudentProfileController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping("/admin-check")
+public ResponseEntity<String> adminCheck(
+        @RequestHeader(value = "X-ROLE", required = false) String role) {
+
+    if (!"ADMIN".equalsIgnoreCase(role)) {
+        return ResponseEntity.status(403)
+                .body("ACCESS DENIED – ADMIN ONLY");
+    }
+
+    return ResponseEntity.ok("ACCESS GRANTED – ADMIN");
+}
+
 }
