@@ -1,87 +1,48 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.AuthRequest;
-import com.example.demo.model.UserAccount;
-import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtUtil;
-import com.example.demo.security.Role;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.demo.repository.UserAccountRepository;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
+    
     private final JwtUtil jwtUtil;
-    private final UserAccountRepository userRepo;
+    private final Map<String, String> users = new HashMap<>();
 
-    // ✅ CONSTRUCTOR REQUIRED BY TESTS
+
     public AuthController(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.userRepo = null; // not used in tests
-    }
-
-    // ✅ CONSTRUCTOR USED BY SPRING
-    public AuthController(JwtUtil jwtUtil,
-                          UserAccountRepository userRepo) {
-        this.jwtUtil = jwtUtil;
-        this.userRepo = userRepo;
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AuthRequest request) {
-
-        // If repository is available, enforce duplicate check (runtime)
-        if (userRepo != null &&
-                userRepo.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("User already exists");
+        if (users.containsKey(request.getUsername())) {
+            return ResponseEntity.badRequest().body("User already exists");
         }
-
-        // Default role handling
-        Role role;
-        try {
-            role = request.getRole() != null
-                    ? Role.valueOf(request.getRole())
-                    : Role.USER;
-        } catch (Exception e) {
-            role = Role.USER;
-        }
-
-        // Generate token (tests + Swagger)
-        String token = jwtUtil.generateToken(
-                request.getEmail(),
-                role.name(),
-                request.getEmail(),
-                "1"
-        );
-
+        
+        users.put(request.getUsername(), request.getPassword());
+        String token = jwtUtil.generateToken(request.getUsername(), 
+                request.getRole() != null ? request.getRole() : "USER", 
+                request.getEmail(), "1");
         return ResponseEntity.ok(Map.of("token", token));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-
-        Role role;
-        try {
-            role = request.getRole() != null
-                    ? Role.valueOf(request.getRole())
-                    : Role.USER;
-        } catch (Exception e) {
-            role = Role.USER;
+        String storedPassword = users.get(request.getUsername());
+        if (storedPassword == null || !storedPassword.equals(request.getPassword())) {
+            return ResponseEntity.status(401).body("Invalid credentials");
         }
-
-        String token = jwtUtil.generateToken(
-                request.getEmail(),
-                role.name(),
-                request.getEmail(),
-                "1"
-        );
-
+        
+        String token = jwtUtil.generateToken(request.getUsername(), "USER", 
+                request.getEmail(), "1");
         return ResponseEntity.ok(Map.of("token", token));
     }
 }
