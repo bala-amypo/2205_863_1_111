@@ -1,76 +1,55 @@
-package com.example.demo.config;
+package com.example.demo.controller;
 
-import com.example.demo.security.JwtAuthenticationFilter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.example.demo.dto.AuthRequest;
+import com.example.demo.security.JwtUtil;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@Configuration
-@EnableWebSecurity
-public class SecurityConfig {
+import java.util.Map;
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    private final JwtUtil jwtUtil;
+
+    public AuthController(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
     }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
 
-        http
-            .csrf(csrf -> csrf.disable())
+        String role = request.getRole();
+        if (role == null || role.isBlank()) {
+            role = "USER";
+        }
 
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+        String token = jwtUtil.generateToken(
+                request.getEmail(),
+                role,
+                request.getEmail(),
+                "1"
+        );
 
-            .authorizeHttpRequests(auth -> auth
-
-                // Public
-                .requestMatchers(
-                        "/auth/**",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**"
-                ).permitAll()
-
-                // ADMIN only
-                .requestMatchers(
-                        "/api/students/**",
-                        "/api/room-assignments/**"
-                ).hasAuthority("ROLE_ADMIN")
-
-                // USER + ADMIN
-                .requestMatchers("/api/**")
-                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-
-                .anyRequest().denyAll()
-            )
-
-            .addFilterBefore(
-                    jwtAuthenticationFilter,
-                    UsernamePasswordAuthenticationFilter.class
-            );
-
-        return http.build();
+        return ResponseEntity.ok(Map.of("token", token));
     }
 
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        String role = request.getRole();
+        if (role == null || role.isBlank()) {
+            role = "USER";
+        }
+
+        String token = jwtUtil.generateToken(
+                request.getEmail(),
+                role,
+                request.getEmail(),
+                "1"
+        );
+
+        return ResponseEntity.ok(Map.of("token", token));
     }
 }

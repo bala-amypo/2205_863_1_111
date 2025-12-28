@@ -27,27 +27,17 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            // Disable CSRF (JWT is stateless)
             .csrf(csrf -> csrf.disable())
-
-            // Stateless session
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-
-            // Authorization rules
             .authorizeHttpRequests(auth -> auth
 
-                // Public endpoints (UNCHANGED)
                 .requestMatchers(
                         "/auth/**",
                         "/swagger-ui/**",
                         "/v3/api-docs/**"
                 ).permitAll()
-
-                // =======================
-                // ✅ ADDED ROLE CHECKS
-                // =======================
 
                 // ADMIN only
                 .requestMatchers(
@@ -56,24 +46,11 @@ public class SecurityConfig {
                 ).hasRole("ADMIN")
 
                 // USER + ADMIN
-                .requestMatchers(
-                        "/api/habits/**",
-                        "/api/matches/**",
-                        "/api/match-attempts/**"
-                ).hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/**")
+                .hasAnyRole("USER", "ADMIN")
 
-                // =======================
-                // EXISTING RULE (UNCHANGED)
-                // =======================
-
-                // Protected APIs (fallback – keeps tests safe)
-                .requestMatchers("/api/**").authenticated()
-
-                // Everything else
                 .anyRequest().denyAll()
             )
-
-            // JWT filter
             .addFilterBefore(
                     jwtAuthenticationFilter,
                     UsernamePasswordAuthenticationFilter.class
@@ -82,14 +59,12 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Authentication manager
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // Password encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
