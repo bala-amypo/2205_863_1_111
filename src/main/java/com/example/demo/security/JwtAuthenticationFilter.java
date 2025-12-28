@@ -41,15 +41,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        String username = jwtUtil.getUsernameFromToken(token);
+        String username;
+
+        try {
+            username = jwtUtil.getUsernameFromToken(token);
+        } catch (Exception ex) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (username != null &&
             SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails;
 
-             if(jwtUtil.validateToken(token, userDetails.getUsername())){
+            try {
+                // NORMAL FLOW
+                userDetails = userDetailsService.loadUserByUsername(username);
+            } catch (Exception ex) {
+                // 🔴 FALLBACK (prevents 403 for valid tokens)
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // 🔴 RELAXED VALIDATION (critical)
+            if (jwtUtil.validate(token)) {
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -62,7 +78,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                // ✅ THIS LINE MAKES AUTH WORK
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
             }
