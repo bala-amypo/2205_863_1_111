@@ -69,4 +69,15 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    // =======================
+// SECURITY DEMO (EXAM)
+// =======================
+
+// ADMIN only demo endpoint
+.requestMatchers("/api/security-demo/admin").hasRole("ADMIN")
+
+// USER + ADMIN demo endpoint
+.requestMatchers("/api/security-demo/user").hasAnyRole("USER", "ADMIN")
+
 }
