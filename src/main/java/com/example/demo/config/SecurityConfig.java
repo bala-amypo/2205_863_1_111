@@ -45,21 +45,7 @@ public class SecurityConfig {
                         "/v3/api-docs/**"
                 ).permitAll()
 
-                // =======================
-                // SECURITY DEMO (EXAM)
-                // =======================
 
-                // ADMIN only demo endpoint
-                .requestMatchers("/api/security-demo/admin").hasRole("ADMIN")
-
-                // USER + ADMIN demo endpoint
-                .requestMatchers("/api/security-demo/user").hasAnyRole("USER", "ADMIN")
-
-                // =======================
-                // EXISTING RULE (UNCHANGED)
-                // =======================
-
-                // Protected APIs (fallback)
                 .requestMatchers("/api/**").authenticated()
 
                 // Everything else
